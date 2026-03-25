@@ -104,7 +104,7 @@ function loadData() {
       if (item.status.label === "EXPIRED") labelClass = "label-expired";
       else if (item.status.label === "DUE SOON") labelClass = "label-warning";
 
-      // 🔥 RECEIPT DISPLAY (UPDATED)
+      // 🔥 RECEIPT DISPLAY
       let receiptHTML = "-";
 
       if (item.receiptUrl) {
@@ -117,13 +117,9 @@ function loadData() {
                  onclick="openModal('${item.receiptUrl}')">
           `;
         } else if (url.includes(".pdf")) {
-          receiptHTML = `
-            <a href="${item.receiptUrl}" target="_blank">📄 View PDF</a>
-          `;
+          receiptHTML = `<a href="${item.receiptUrl}" target="_blank">📄 View PDF</a>`;
         } else {
-          receiptHTML = `
-            <a href="${item.receiptUrl}" target="_blank">View File</a>
-          `;
+          receiptHTML = `<a href="${item.receiptUrl}" target="_blank">View File</a>`;
         }
       }
 
@@ -134,15 +130,12 @@ function loadData() {
           <td>${item.desc || ""}</td>
           <td>${item.serial || ""}</td>
           <td>${item.resit || ""}</td>
-
           <td>${receiptHTML}</td>
-
           <td>${item.expiry}</td>
           <td><span class="label ${labelClass}">${item.status.label}</span></td>
           <td>${item.qty || ""}</td>
           <td>${item.price || ""}</td>
           <td>${formatDate(item.date)}</td>
-
           <td>
             <button class="btn-edit" onclick="editItem('${item.id}')">✏️</button>
             <button class="btn-delete" onclick="deleteItem('${item.id}')">🗑</button>
@@ -158,12 +151,9 @@ function loadData() {
       total.toLocaleString(undefined, { minimumFractionDigits: 2 });
 
     if (!alertShown && (expiredCount > 0 || dueSoonCount > 0)) {
-
       let message = "";
-
       if (expiredCount > 0) message += `❌ ${expiredCount} equipment EXPIRED\n`;
       if (dueSoonCount > 0) message += `⚠️ ${dueSoonCount} equipment DUE SOON\n`;
-
       alert(message);
       alertShown = true;
     }
@@ -173,7 +163,6 @@ function loadData() {
 
 // 🔥 SAVE
 function saveData(newItem) {
-
   if (editId) {
     db.collection("equipment").doc(editId).update(newItem).then(() => {
       editId = null;
@@ -226,16 +215,11 @@ function addEquipment() {
   } else {
 
     if (editId) {
-
       db.collection("equipment").doc(editId).get().then(doc => {
-
         let oldData = doc.data();
         newItem.receiptUrl = oldData.receiptUrl || "";
-
         saveData(newItem);
-
       });
-
     } else {
       newItem.receiptUrl = "";
       saveData(newItem);
@@ -245,9 +229,7 @@ function addEquipment() {
 
 // ✏️ EDIT
 function editItem(id) {
-
   db.collection("equipment").doc(id).get().then(doc => {
-
     let item = doc.data();
 
     tag.value = item.tag || "";
@@ -316,6 +298,95 @@ function clearForm() {
   price.value = "";
   date.value = "";
   document.getElementById("receiptFile").value = "";
+}
+
+// ==========================
+// 🔥 MODAL ZOOM + DRAG + PINCH
+// ==========================
+let scale = 1;
+let translateX = 0;
+let translateY = 0;
+let startX, startY;
+let isDragging = false;
+let lastDistance = 0;
+
+const img = document.getElementById("modalImg");
+
+function openModal(src) {
+  document.getElementById("imageModal").style.display = "block";
+  img.src = src;
+
+  scale = 1;
+  translateX = 0;
+  translateY = 0;
+  updateTransform();
+}
+
+function closeModal() {
+  document.getElementById("imageModal").style.display = "none";
+}
+
+// 🖥 SCROLL ZOOM
+img.addEventListener("wheel", function(e) {
+  e.preventDefault();
+  scale += (e.deltaY < 0 ? 0.1 : -0.1);
+  scale = Math.min(Math.max(1, scale), 5);
+  updateTransform();
+});
+
+// 🖱 DRAG
+img.addEventListener("mousedown", e => {
+  isDragging = true;
+  startX = e.clientX - translateX;
+  startY = e.clientY - translateY;
+});
+
+window.addEventListener("mouseup", () => isDragging = false);
+
+window.addEventListener("mousemove", e => {
+  if (!isDragging) return;
+  translateX = e.clientX - startX;
+  translateY = e.clientY - startY;
+  updateTransform();
+});
+
+// 📱 TOUCH
+img.addEventListener("touchstart", e => {
+  if (e.touches.length === 2) {
+    lastDistance = getDistance(e.touches);
+  }
+  if (e.touches.length === 1) {
+    startX = e.touches[0].clientX - translateX;
+    startY = e.touches[0].clientY - translateY;
+  }
+}, { passive: false });
+
+img.addEventListener("touchmove", e => {
+  e.preventDefault();
+
+  if (e.touches.length === 2) {
+    let dist = getDistance(e.touches);
+    scale += (dist - lastDistance) * 0.005;
+    scale = Math.min(Math.max(1, scale), 5);
+    lastDistance = dist;
+  }
+
+  if (e.touches.length === 1) {
+    translateX = e.touches[0].clientX - startX;
+    translateY = e.touches[0].clientY - startY;
+  }
+
+  updateTransform();
+}, { passive: false });
+
+function getDistance(touches) {
+  let dx = touches[0].clientX - touches[1].clientX;
+  let dy = touches[0].clientY - touches[1].clientY;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+function updateTransform() {
+  img.style.transform = `translate(-50%, -50%) scale(${scale}) translate(${translateX}px, ${translateY}px)`;
 }
 
 // 🚀 START
