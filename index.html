@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MY-EQUIPMENT</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      background-color: #eef2f7;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      width: 90%;
+      margin: auto;
+      margin-top: 30px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #1f4e79;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    input {
+      padding: 10px;
+      margin: 5px;
+      width: 200px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .btn-add {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .btn-edit {
+      background-color: #ffc107;
+    }
+
+    .btn-delete {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      background-color: #1f4e79;
+      color: white;
+      padding: 10px;
+    }
+
+    td {
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
+      text-align: center;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    .search-box {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>MY-EQUIPMENT</h1>
+
+    <div class="card">
+      <input 
+        type="text" 
+        id="search" 
+        class="search-box"
+        placeholder="🔍 Search equipment..."
+        onkeyup="searchTable()">
+    </div>
+
+    <div class="card">
+      <h3>Add New Equipment</h3>
+
+      <input type="text" id="tag" placeholder="Tagging No.">
+      <input type="text" id="desc" placeholder="Description">
+      <input type="text" id="serial" placeholder="Serial">
+      <input type="text" id="cal" placeholder="Calibration">
+      <input type="text" id="qty" placeholder="Quantity">
+      <input type="text" id="price" placeholder="Price">
+      <input type="text" id="date" placeholder="Date">
+
+      <br><br>
+
+      <button class="btn-add" onclick="addEquipment()">➕ Add Equipment</button>
+    </div>
+
+    <div class="card">
+      <button onclick="exportToExcel()" class="btn-add">📥 Export to Excel</button>
+<br><br>
+      <table>
+        <thead>
+          <tr>
+            <th>No.</th>
+            <th>Tagging</th>
+            <th>Description</th>
+            <th>Serial</th>
+            <th>Calibration</th>
+            <th>Qty</th>
+            <th>Price</th>
+            <th>Date</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- ✅ SCRIPT MUST BE HERE -->
+  <script src="script.js"></script>
+
+</body>
+</html>
