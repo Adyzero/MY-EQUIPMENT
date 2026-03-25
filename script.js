@@ -7,6 +7,19 @@ function parsePrice(value) {
   return parseFloat(value.toString().replace(/,/g, "")) || 0;
 }
 
+// 🔧 FORMAT DATE → DD/MM/YYYY
+function formatDate(dateStr) {
+  if (!dateStr) return "";
+
+  let d = new Date(dateStr);
+
+  let day = d.getDate().toString().padStart(2, "0");
+  let month = (d.getMonth() + 1).toString().padStart(2, "0");
+  let year = d.getFullYear();
+
+  return `${day}/${month}/${year}`;
+}
+
 // 🔥 CALCULATE EXPIRY + STATUS
 function getExpiryStatus(calDate, validity) {
 
@@ -19,7 +32,7 @@ function getExpiryStatus(calDate, validity) {
     };
   }
 
-  let cal = new Date(calDate); // from date picker
+  let cal = new Date(calDate);
   let expiry = new Date(cal);
 
   expiry.setFullYear(expiry.getFullYear() + parseInt(validity));
@@ -42,8 +55,11 @@ function getExpiryStatus(calDate, validity) {
     priority = 2;
   }
 
+  // 🔥 FORMAT EXPIRY DATE
+  let formattedExpiry = formatDate(expiry);
+
   return {
-    expiry: expiry.toISOString().split("T")[0], // YYYY-MM-DD
+    expiry: formattedExpiry,
     label: label,
     class: cssClass,
     priority: priority
@@ -99,7 +115,7 @@ function loadData() {
           <td><span class="label ${labelClass}">${item.status.label}</span></td>
           <td>${item.qty || ""}</td>
           <td>${item.price || ""}</td>
-          <td>${item.date || ""}</td>
+          <td>${formatDate(item.date)}</td>
           <td>
             <button class="btn-edit" onclick="editItem('${item.id}')">✏️</button>
             <button class="btn-delete" onclick="deleteItem('${item.id}')">🗑</button>
@@ -125,7 +141,7 @@ function addEquipment() {
     tag: document.getElementById("tag").value.trim(),
     desc: document.getElementById("desc").value.trim(),
     serial: document.getElementById("serial").value.trim(),
-    cal: document.getElementById("cal").value, // date picker
+    cal: document.getElementById("cal").value,
     validity: document.getElementById("validity").value,
     qty: document.getElementById("qty").value.trim(),
     price: document.getElementById("price").value.trim(),
