@@ -1,17 +1,26 @@
 let table = document.getElementById("tableBody");
+let editId = null; // 🔥 track editing
 
+// 🔥 REAL-TIME LOAD
 function loadData() {
 
   db.collection("equipment").onSnapshot(snapshot => {
 
-    table.innerHTML = "";
+    let html = "";
     let i = 1;
+    let total = 0;
+    let count = 0;
 
     snapshot.forEach(doc => {
       let item = doc.data();
       let id = doc.id;
 
-      let row =
+      count++;
+
+      let price = parseFloat(item.price) || 0;
+      total += price;
+
+      html +=
         "<tr>" +
         "<td>" + i++ + "</td>" +
         "<td>" + (item.tag || "") + "</td>" +
@@ -28,13 +37,23 @@ function loadData() {
         "</td>" +
 
         "</tr>";
-
-      table.innerHTML += row;
     });
+
+    table.innerHTML = html;
+
+    // 🔥 DASHBOARD UPDATE (if you added dashboard)
+    let totalItems = document.getElementById("totalItems");
+    let totalValue = document.getElementById("totalValue");
+
+    if (totalItems && totalValue) {
+      totalItems.innerText = count;
+      totalValue.innerText = total.toFixed(2);
+    }
 
   });
 }
 
+// ➕ ADD / UPDATE
 function addEquipment() {
 
   let newItem = {
@@ -47,45 +66,21 @@ function addEquipment() {
     date: document.getElementById("date").value
   };
 
-  db.collection("equipment").add(newItem).then(() => {
-
-    document.getElementById("tag").value = "";
-    document.getElementById("desc").value = "";
-    document.getElementById("serial").value = "";
-    document.getElementById("cal").value = "";
-    document.getElementById("qty").value = "";
-    document.getElementById("price").value = "";
-    document.getElementById("date").value = "";
-
-    loadData();
-  });
-}
-
-function searchTable() {
-  let input = document.getElementById("search").value.toLowerCase();
-  let rows = document.querySelectorAll("#tableBody tr");
-
-  rows.forEach(row => {
-    let text = row.innerText.toLowerCase();
-    row.style.display = text.includes(input) ? "" : "none";
-  });
-}
-
-window.onload = function () {
-  loadData();
-};
-
-function deleteItem(id) {
-
-  if (confirm("Delete this item?")) {
-
-    db.collection("equipment").doc(id).delete().then(() => {
-      loadData();
+  if (editId) {
+    // ✏️ UPDATE
+    db.collection("equipment").doc(editId).update(newItem).then(() => {
+      editId = null;
+      clearForm();
     });
-
+  } else {
+    // ➕ ADD
+    db.collection("equipment").add(newItem).then(() => {
+      clearForm();
+    });
   }
 }
 
+// ✏️ EDIT
 function editItem(id) {
 
   db.collection("equipment").doc(id).get().then(doc => {
@@ -100,8 +95,65 @@ function editItem(id) {
     document.getElementById("price").value = item.price || "";
     document.getElementById("date").value = item.date || "";
 
-    // delete old then user re-add
-    deleteItem(id);
-
+    editId = id; // 🔥 store ID
   });
 }
+
+// 🗑 DELETE
+function deleteItem(id) {
+
+  if (confirm("Delete this item?")) {
+
+    db.collection("equipment").doc(id).delete();
+
+  }
+}
+
+// 🔍 SEARCH
+function searchTable() {
+  let input = document.getElementById("search").value.toLowerCase();
+  let rows = document.querySelectorAll("#tableBody tr");
+
+  rows.forEach(row => {
+    let text = row.innerText.toLowerCase();
+    row.style.display = text.includes(input) ? "" : "none";
+  });
+}
+
+// 📥 EXPORT
+function exportToExcel() {
+  let rows = document.querySelectorAll("table tr");
+  let csv = [];
+
+  rows.forEach(row => {
+    let cols = row.querySelectorAll("td, th");
+    let rowData = [];
+
+    cols.forEach(col => rowData.push(col.innerText));
+    csv.push(rowData.join(","));
+  });
+
+  let blob = new Blob([csv.join("\n")], { type: "text/csv" });
+  let url = window.URL.createObjectURL(blob);
+
+  let a = document.createElement("a");
+  a.href = url;
+  a.download = "MY-EQUIPMENT.csv";
+  a.click();
+}
+
+// 🧹 CLEAR FORM
+function clearForm() {
+  document.getElementById("tag").value = "";
+  document.getElementById("desc").value = "";
+  document.getElementById("serial").value = "";
+  document.getElementById("cal").value = "";
+  document.getElementById("qty").value = "";
+  document.getElementById("price").value = "";
+  document.getElementById("date").value = "";
+}
+
+// 🚀 START
+window.onload = function () {
+  loadData();
+};

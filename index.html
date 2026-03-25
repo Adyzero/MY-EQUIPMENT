@@ -4,89 +4,7 @@
   <title>MY-EQUIPMENT</title>
 
   <style>
-    body {
-      font-family: Arial;
-      background-color: #eef2f7;
-      margin: 0;
-      padding: 0;
-    }
-
-    .container {
-      width: 90%;
-      margin: auto;
-      margin-top: 30px;
-    }
-
-    h1 {
-      text-align: center;
-      color: #1f4e79;
-    }
-
-    .card {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    input {
-      padding: 10px;
-      margin: 5px;
-      width: 200px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-
-    button {
-      padding: 8px 12px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .btn-add {
-      background-color: #28a745;
-      color: white;
-    }
-
-    .btn-edit {
-      background-color: #ffc107;
-    }
-
-    .btn-delete {
-      background-color: #dc3545;
-      color: white;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th {
-      background-color: #1f4e79;
-      color: white;
-      padding: 10px;
-    }
-
-    td {
-      padding: 8px;
-      border-bottom: 1px solid #ddd;
-      text-align: center;
-    }
-
-    tr:hover {
-      background-color: #f1f1f1;
-    }
-
-    .search-box {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 15px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
+    /* your CSS (same as yours) */
   </style>
 </head>
 
@@ -96,6 +14,7 @@
 
     <h1>MY-EQUIPMENT</h1>
 
+    <!-- SEARCH -->
     <div class="card">
       <input 
         type="text" 
@@ -105,6 +24,7 @@
         onkeyup="searchTable()">
     </div>
 
+    <!-- ADD FORM -->
     <div class="card">
       <h3>Add New Equipment</h3>
 
@@ -121,6 +41,7 @@
       <button class="btn-add" onclick="addEquipment()">➕ Add Equipment</button>
     </div>
 
+    <!-- TABLE -->
     <div class="card">
       <button onclick="exportToExcel()" class="btn-add">📥 Export to Excel</button>
       <br><br>
@@ -146,10 +67,11 @@
 
   </div>
 
-  <!-- 🔥 FIREBASE (ADD THIS PART) -->
+  <!-- 🔥 STEP 1: FIREBASE LIBRARY -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
+  <!-- 🔥 STEP 2: FIREBASE CONFIG -->
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyD8aMwAusxC5CvUYC-k0aMvRZTdDK58CBM",
@@ -164,7 +86,7 @@
     const db = firebase.firestore();
   </script>
 
-  <!-- YOUR SCRIPT -->
+  <!-- 🔥 STEP 3: YOUR JS -->
   <script src="script.js"></script>
 
 </body>
