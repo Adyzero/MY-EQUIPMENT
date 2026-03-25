@@ -3,7 +3,6 @@
 <head>
   <title>MY-EQUIPMENT</title>
 
-  <!-- FONT -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
   <style>
@@ -32,7 +31,6 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
-    /* DASHBOARD */
     .dashboard {
       display: flex;
       gap: 20px;
@@ -49,7 +47,6 @@
     .box-blue { background: #1f4e79; }
     .box-green { background: #28a745; }
 
-    /* FORM */
     .form-grid {
       display: flex;
       flex-wrap: wrap;
@@ -69,7 +66,6 @@
       margin-top: 5px;
     }
 
-    /* BUTTON */
     button {
       padding: 10px 15px;
       border: none;
@@ -82,12 +78,10 @@
     .btn-edit { background: #ffc107; }
     .btn-delete { background: #dc3545; color: white; }
 
-    /* FILTER BUTTONS */
     .filter-group button {
       margin-right: 5px;
     }
 
-    /* TABLE */
     table {
       width: 100%;
       border-collapse: collapse;
@@ -108,7 +102,6 @@
     .expired { background: #ffcccc !important; }
     .warning { background: #fff3cd !important; }
 
-    /* LABEL */
     .label {
       padding: 4px 8px;
       border-radius: 6px;
@@ -120,12 +113,41 @@
     .label-warning { background: orange; color: white; }
     .label-ok { background: green; color: white; }
 
-    /* SEARCH */
     .search-box {
       width: 100%;
       padding: 12px;
       border-radius: 6px;
       border: 1px solid #ccc;
+    }
+
+    /* 🔥 MODAL */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      padding-top: 60px;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.9);
+    }
+
+    .modal-content {
+      margin: auto;
+      display: block;
+      max-width: 80%;
+      max-height: 80%;
+      border-radius: 10px;
+    }
+
+    .close {
+      position: absolute;
+      top: 20px;
+      right: 40px;
+      color: white;
+      font-size: 40px;
+      cursor: pointer;
     }
 
   </style>
@@ -137,7 +159,6 @@
 
   <h1>MY-EQUIPMENT</h1>
 
-  <!-- DASHBOARD -->
   <div class="card dashboard">
     <div class="box box-blue">
       <h4>Total Equipment</h4>
@@ -150,14 +171,12 @@
     </div>
   </div>
 
-  <!-- SEARCH -->
   <div class="card">
     <input type="text" id="search" class="search-box"
       placeholder="🔍 Search equipment..."
       onkeyup="searchTable()">
   </div>
 
-  <!-- FORM -->
   <div class="card">
     <h3>Add / Edit Equipment</h3>
 
@@ -168,13 +187,12 @@
       <input id="resit" placeholder="Resit No.">
 
       <input type="date" id="cal">
-      <input type="number" id="validity" placeholder="Validity (Years)" min="1" max="5">
+      <input type="number" id="validity" placeholder="Validity (Years)">
 
       <input id="qty" placeholder="Quantity">
       <input id="price" placeholder="Price (RM)">
       <input type="date" id="date">
 
-      <!-- FILE -->
       <input type="file" id="receiptFile" onchange="showFileName()">
     </div>
 
@@ -185,7 +203,6 @@
     <button class="btn-add" onclick="addEquipment()">➕ Save Equipment</button>
   </div>
 
-  <!-- TABLE -->
   <div class="card">
 
     <div class="filter-group">
@@ -225,6 +242,12 @@
 
 </div>
 
+<!-- 🔥 IMAGE MODAL -->
+<div id="imageModal" class="modal" onclick="closeModal()">
+  <span class="close">&times;</span>
+  <img class="modal-content" id="modalImg">
+</div>
+
 <!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -246,10 +269,19 @@ const storage = firebase.storage();
 </script>
 
 <script>
-// 🔥 SHOW FILE NAME
 function showFileName() {
   let file = document.getElementById("receiptFile").files[0];
   document.getElementById("fileName").innerText = file ? file.name : "No file selected";
+}
+
+// 🔥 MODAL FUNCTION
+function openModal(src) {
+  document.getElementById("imageModal").style.display = "block";
+  document.getElementById("modalImg").src = src;
+}
+
+function closeModal() {
+  document.getElementById("imageModal").style.display = "none";
 }
 </script>
 

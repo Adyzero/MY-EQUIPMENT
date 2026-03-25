@@ -22,7 +22,7 @@ function formatDate(dateStr) {
   return `${day}/${month}/${year}`;
 }
 
-// 🔥 EXPIRY LOGIC
+// 🔥 EXPIRY
 function getExpiryStatus(calDate, validity) {
 
   if (!calDate || !validity) {
@@ -92,7 +92,6 @@ function loadData() {
       data.push(item);
     });
 
-    // 🔥 SORT BY STATUS
     data.sort((a, b) => a.status.priority - b.status.priority);
 
     let html = "";
@@ -105,7 +104,7 @@ function loadData() {
       if (item.status.label === "EXPIRED") labelClass = "label-expired";
       else if (item.status.label === "DUE SOON") labelClass = "label-warning";
 
-      // 🔥 RECEIPT DISPLAY (IMAGE / PDF)
+      // 🔥 RECEIPT DISPLAY (UPDATED)
       let receiptHTML = "-";
 
       if (item.receiptUrl) {
@@ -115,7 +114,7 @@ function loadData() {
           receiptHTML = `
             <img src="${item.receiptUrl}" 
                  style="width:60px;height:60px;object-fit:cover;border-radius:6px;cursor:pointer"
-                 onclick="window.open('${item.receiptUrl}')">
+                 onclick="openModal('${item.receiptUrl}')">
           `;
         } else if (url.includes(".pdf")) {
           receiptHTML = `
@@ -154,12 +153,10 @@ function loadData() {
 
     table.innerHTML = html;
 
-    // 📊 DASHBOARD
     document.getElementById("totalItems").innerText = data.length;
     document.getElementById("totalValue").innerText =
       total.toLocaleString(undefined, { minimumFractionDigits: 2 });
 
-    // 🔔 ALERT ONCE
     if (!alertShown && (expiredCount > 0 || dueSoonCount > 0)) {
 
       let message = "";
