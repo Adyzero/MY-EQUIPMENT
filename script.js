@@ -1,6 +1,10 @@
 let table = document.getElementById("tableBody");
 let editId = null;
 
+// 🔥 FILTER + ALERT CONTROL
+let currentFilter = "ALL";
+let alertShown = false;
+
 // 🔧 Convert price safely
 function parsePrice(value) {
   if (!value) return 0;
@@ -24,12 +28,7 @@ function formatDate(dateStr) {
 function getExpiryStatus(calDate, validity) {
 
   if (!calDate || !validity) {
-    return {
-      expiry: "-",
-      label: "OK",
-      class: "",
-      priority: 3
-    };
+    return { expiry: "-", label: "OK", class: "", priority: 3 };
   }
 
   let cal = new Date(calDate);
@@ -55,24 +54,29 @@ function getExpiryStatus(calDate, validity) {
     priority = 2;
   }
 
-  // 🔥 FORMAT EXPIRY DATE
-  let formattedExpiry = formatDate(expiry);
-
   return {
-    expiry: formattedExpiry,
+    expiry: formatDate(expiry),
     label: label,
     class: cssClass,
     priority: priority
   };
 }
 
-// 🔥 REAL-TIME LOAD + SORT
+// 🔥 SET FILTER
+function setFilter(type) {
+  currentFilter = type;
+  loadData();
+}
+
+// 🔥 REAL-TIME LOAD + SORT + FILTER + ALERT
 function loadData() {
 
   db.collection("equipment").onSnapshot(snapshot => {
 
     let data = [];
     let total = 0;
+    let expiredCount = 0;
+    let dueSoonCount = 0;
 
     snapshot.forEach(doc => {
 
@@ -84,18 +88,27 @@ function loadData() {
       item.expiry = result.expiry;
       item.status = result;
 
+      // 🔥 COUNT ALERT
+      if (item.status.label === "EXPIRED") expiredCount++;
+      if (item.status.label === "DUE SOON") dueSoonCount++;
+
       item.priceValue = parsePrice(item.price);
       total += item.priceValue;
 
       data.push(item);
     });
 
-    // 🔥 SORT (Expired → Due Soon → OK)
+    // 🔥 SORT
     data.sort((a, b) => a.status.priority - b.status.priority);
 
     let html = "";
 
     data.forEach((item, index) => {
+
+      // 🔥 FILTER
+      if (currentFilter !== "ALL" && item.status.label !== currentFilter) {
+        return;
+      }
 
       let labelClass = "label-ok";
 
@@ -131,10 +144,27 @@ function loadData() {
     document.getElementById("totalValue").innerText =
       total.toLocaleString(undefined, { minimumFractionDigits: 2 });
 
+    // 🔔 ALERT (ONLY ONCE)
+    if (!alertShown && (expiredCount > 0 || dueSoonCount > 0)) {
+
+      let message = "";
+
+      if (expiredCount > 0) {
+        message += `❌ ${expiredCount} equipment EXPIRED\n`;
+      }
+
+      if (dueSoonCount > 0) {
+        message += `⚠️ ${dueSoonCount} equipment DUE SOON\n`;
+      }
+
+      alert(message);
+      alertShown = true;
+    }
+
   });
 }
 
-// ➕ ADD / ✏️ UPDATE
+// ➕ ADD / UPDATE
 function addEquipment() {
 
   let newItem = {
@@ -172,14 +202,14 @@ function editItem(id) {
 
     let item = doc.data();
 
-    document.getElementById("tag").value = item.tag || "";
-    document.getElementById("desc").value = item.desc || "";
-    document.getElementById("serial").value = item.serial || "";
-    document.getElementById("cal").value = item.cal || "";
-    document.getElementById("validity").value = item.validity || "";
-    document.getElementById("qty").value = item.qty || "";
-    document.getElementById("price").value = item.price || "";
-    document.getElementById("date").value = item.date || "";
+    tag.value = item.tag || "";
+    desc.value = item.desc || "";
+    serial.value = item.serial || "";
+    cal.value = item.cal || "";
+    validity.value = item.validity || "";
+    qty.value = item.qty || "";
+    price.value = item.price || "";
+    date.value = item.date || "";
 
     editId = id;
   });
@@ -187,7 +217,6 @@ function editItem(id) {
 
 // 🗑 DELETE
 function deleteItem(id) {
-
   if (confirm("Delete this item?")) {
     db.collection("equipment").doc(id).delete();
   }
@@ -205,7 +234,7 @@ function searchTable() {
   });
 }
 
-// 📥 EXPORT CSV
+// 📥 EXPORT
 function exportToExcel() {
 
   let rows = document.querySelectorAll("table tr");
@@ -230,14 +259,14 @@ function exportToExcel() {
 
 // 🧹 CLEAR FORM
 function clearForm() {
-  document.getElementById("tag").value = "";
-  document.getElementById("desc").value = "";
-  document.getElementById("serial").value = "";
-  document.getElementById("cal").value = "";
-  document.getElementById("validity").value = "";
-  document.getElementById("qty").value = "";
-  document.getElementById("price").value = "";
-  document.getElementById("date").value = "";
+  tag.value = "";
+  desc.value = "";
+  serial.value = "";
+  cal.value = "";
+  validity.value = "";
+  qty.value = "";
+  price.value = "";
+  date.value = "";
 }
 
 // 🚀 START

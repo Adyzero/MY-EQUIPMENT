@@ -3,7 +3,6 @@
 <head>
   <title>MY-EQUIPMENT</title>
 
-  <!-- FONT -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
   <style>
@@ -22,7 +21,6 @@
     h1 {
       text-align: center;
       color: #1f4e79;
-      margin-bottom: 20px;
     }
 
     .card {
@@ -64,7 +62,6 @@
       border: 1px solid #ccc;
     }
 
-    /* BUTTON */
     button {
       padding: 10px 15px;
       border: none;
@@ -74,9 +71,7 @@
     }
 
     .btn-add { background: #28a745; color: white; }
-    .btn-add:hover { background: #218838; }
-
-    .btn-edit { background: #ffc107; margin-right: 5px; }
+    .btn-edit { background: #ffc107; }
     .btn-delete { background: #dc3545; color: white; }
 
     /* TABLE */
@@ -97,20 +92,10 @@
       text-align: center;
     }
 
-    tr:hover {
-      background-color: #f5f5f5;
-    }
+    /* STATUS COLORS */
+    .expired { background: #ffcccc !important; }
+    .warning { background: #fff3cd !important; }
 
-    /* EXPIRY COLORS */
-    .expired {
-      background-color: #ffcccc !important;
-    }
-
-    .warning {
-      background-color: #fff3cd !important;
-    }
-
-    /* LABEL */
     .label {
       padding: 4px 8px;
       border-radius: 6px;
@@ -154,10 +139,7 @@
 
   <!-- SEARCH -->
   <div class="card">
-    <input 
-      type="text" 
-      id="search" 
-      class="search-box"
+    <input type="text" id="search" class="search-box"
       placeholder="🔍 Search equipment..."
       onkeyup="searchTable()">
   </div>
@@ -171,16 +153,15 @@
       <input id="desc" placeholder="Description">
       <input id="serial" placeholder="Serial">
 
-      <!-- 🔥 DATE PICKER -->
+      <!-- DATE PICKER -->
       <input type="date" id="cal">
 
-      <!-- 🔥 VALIDITY (years) -->
+      <!-- VALIDITY -->
       <input type="number" id="validity" placeholder="Validity (Years)" min="1" max="5">
 
       <input id="qty" placeholder="Quantity">
       <input id="price" placeholder="Price (RM)">
 
-      <!-- OPTIONAL PURCHASE DATE -->
       <input type="date" id="date">
     </div>
 
@@ -191,7 +172,17 @@
 
   <!-- TABLE -->
   <div class="card">
+
+    <!-- 🔥 FILTER BUTTONS -->
+    <div style="margin-bottom:10px;">
+      <button onclick="setFilter('ALL')" class="btn-add">All</button>
+      <button onclick="setFilter('EXPIRED')" class="btn-delete">Expired</button>
+      <button onclick="setFilter('DUE SOON')" class="btn-edit">Due Soon</button>
+      <button onclick="setFilter('OK')">OK</button>
+    </div>
+
     <button onclick="exportToExcel()" class="btn-add">📥 Export to Excel</button>
+
     <br><br>
 
     <table>
@@ -201,7 +192,7 @@
           <th>Tag</th>
           <th>Description</th>
           <th>Serial</th>
-          <th>Expiry Date</th> <!-- 🔥 UPDATED -->
+          <th>Expiry Date</th>
           <th>Status</th>
           <th>Qty</th>
           <th>Price</th>
@@ -234,7 +225,6 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 </script>
 
-<!-- YOUR JS -->
 <script src="script.js"></script>
 
 </body>
