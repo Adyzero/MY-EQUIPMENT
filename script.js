@@ -1,7 +1,6 @@
 let table = document.getElementById("tableBody");
 let editId = null;
 
-// FILTER + ALERT
 let currentFilter = "ALL";
 let alertShown = false;
 
@@ -96,7 +95,6 @@ function loadData() {
       data.push(item);
     });
 
-    // SORT
     data.sort((a, b) => a.status.priority - b.status.priority);
 
     let html = "";
@@ -115,7 +113,15 @@ function loadData() {
           <td>${item.tag || ""}</td>
           <td>${item.desc || ""}</td>
           <td>${item.serial || ""}</td>
-          <td>${item.resit || ""}</td> <!-- ✅ NEW -->
+          <td>${item.resit || ""}</td>
+
+          <!-- 🔥 RECEIPT COLUMN -->
+          <td>
+            ${item.receiptUrl 
+              ? `<a href="${item.receiptUrl}" target="_blank">📄 View</a>` 
+              : "-"}
+          </td>
+
           <td>${item.expiry}</td>
           <td><span class="label ${labelClass}">${item.status.label}</span></td>
           <td>${item.qty || ""}</td>
@@ -131,12 +137,10 @@ function loadData() {
 
     table.innerHTML = html;
 
-    // DASHBOARD
     document.getElementById("totalItems").innerText = data.length;
     document.getElementById("totalValue").innerText =
       total.toLocaleString(undefined, { minimumFractionDigits: 2 });
 
-    // ALERT
     if (!alertShown && (expiredCount > 0 || dueSoonCount > 0)) {
 
       let message = "";
@@ -156,19 +160,37 @@ function loadData() {
   });
 }
 
-// ➕ ADD / UPDATE
+// 🔥 SAVE HELPER
+function saveToFirestore(item) {
+
+  if (editId) {
+    db.collection("equipment").doc(editId).update(item).then(() => {
+      editId = null;
+      clearForm();
+    });
+  } else {
+    db.collection("equipment").add(item).then(() => {
+      clearForm();
+    });
+  }
+}
+
+// ➕ ADD / UPDATE WITH FILE
 function addEquipment() {
+
+  let file = document.getElementById("receiptFile").files[0];
 
   let newItem = {
     tag: tag.value.trim(),
     desc: desc.value.trim(),
     serial: serial.value.trim(),
-    resit: resit.value.trim(), // ✅ NEW
+    resit: resit.value.trim(),
     cal: cal.value,
     validity: validity.value,
     qty: qty.value.trim(),
     price: price.value.trim(),
-    date: date.value
+    date: date.value,
+    receiptUrl: ""
   };
 
   if (!newItem.tag || !newItem.desc) {
@@ -176,15 +198,23 @@ function addEquipment() {
     return;
   }
 
-  if (editId) {
-    db.collection("equipment").doc(editId).update(newItem).then(() => {
-      editId = null;
-      clearForm();
+  if (file) {
+
+    let storageRef = storage.ref("receipts/" + Date.now() + "_" + file.name);
+
+    storageRef.put(file).then(snapshot => {
+
+      snapshot.ref.getDownloadURL().then(url => {
+
+        newItem.receiptUrl = url;
+        saveToFirestore(newItem);
+
+      });
+
     });
+
   } else {
-    db.collection("equipment").add(newItem).then(() => {
-      clearForm();
-    });
+    saveToFirestore(newItem);
   }
 }
 
@@ -198,7 +228,7 @@ function editItem(id) {
     tag.value = item.tag || "";
     desc.value = item.desc || "";
     serial.value = item.serial || "";
-    resit.value = item.resit || ""; // ✅ NEW
+    resit.value = item.resit || "";
     cal.value = item.cal || "";
     validity.value = item.validity || "";
     qty.value = item.qty || "";
@@ -254,12 +284,13 @@ function clearForm() {
   tag.value = "";
   desc.value = "";
   serial.value = "";
-  resit.value = ""; // ✅ NEW
+  resit.value = "";
   cal.value = "";
   validity.value = "";
   qty.value = "";
   price.value = "";
   date.value = "";
+  document.getElementById("receiptFile").value = "";
 }
 
 // 🚀 START

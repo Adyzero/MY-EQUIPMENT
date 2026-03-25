@@ -31,7 +31,6 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
-    /* DASHBOARD */
     .dashboard {
       display: flex;
       gap: 20px;
@@ -48,7 +47,6 @@
     .box-blue { background: #1f4e79; }
     .box-green { background: #28a745; }
 
-    /* FORM */
     .form-grid {
       display: flex;
       flex-wrap: wrap;
@@ -74,7 +72,6 @@
     .btn-edit { background: #ffc107; }
     .btn-delete { background: #dc3545; color: white; }
 
-    /* TABLE */
     table {
       width: 100%;
       border-collapse: collapse;
@@ -92,7 +89,6 @@
       text-align: center;
     }
 
-    /* STATUS */
     .expired { background: #ffcccc !important; }
     .warning { background: #fff3cd !important; }
 
@@ -107,7 +103,6 @@
     .label-warning { background: orange; color: white; }
     .label-ok { background: green; color: white; }
 
-    /* SEARCH */
     .search-box {
       width: 100%;
       padding: 12px;
@@ -152,8 +147,6 @@
       <input id="tag" placeholder="Tagging No.">
       <input id="desc" placeholder="Description">
       <input id="serial" placeholder="Serial">
-
-      <!-- ✅ NEW -->
       <input id="resit" placeholder="Resit No.">
 
       <input type="date" id="cal">
@@ -161,9 +154,10 @@
 
       <input id="qty" placeholder="Quantity">
       <input id="price" placeholder="Price (RM)">
-
-      <!-- ✅ Purchase Date -->
       <input type="date" id="date">
+
+      <!-- 🔥 FILE UPLOAD -->
+      <input type="file" id="receiptFile">
     </div>
 
     <br>
@@ -174,7 +168,6 @@
   <!-- TABLE -->
   <div class="card">
 
-    <!-- FILTER -->
     <div style="margin-bottom:10px;">
       <button onclick="setFilter('ALL')" class="btn-add">All</button>
       <button onclick="setFilter('EXPIRED')" class="btn-delete">Expired</button>
@@ -193,12 +186,13 @@
           <th>Tag</th>
           <th>Description</th>
           <th>Serial</th>
-          <th>Resit No.</th> <!-- ✅ NEW -->
+          <th>Resit No.</th>
+          <th>Receipt</th> <!-- 🔥 NEW -->
           <th>Expiry Date</th>
           <th>Status</th>
           <th>Qty</th>
           <th>Price</th>
-          <th>Purchase Date</th> <!-- ✅ UPDATED -->
+          <th>Purchase Date</th>
           <th>Action</th>
         </tr>
       </thead>
@@ -212,6 +206,7 @@
 <!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
 <script>
 const firebaseConfig = {
@@ -225,6 +220,7 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const storage = firebase.storage(); // 🔥 IMPORTANT
 </script>
 
 <script src="script.js"></script>
