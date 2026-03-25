@@ -4,13 +4,14 @@ let editId = null;
 let currentFilter = "ALL";
 let alertShown = false;
 
-// 🔧 PRICE
+// =====================
+// 🔧 UTIL
+// =====================
 function parsePrice(value) {
   if (!value) return 0;
   return parseFloat(value.toString().replace(/,/g, "")) || 0;
 }
 
-// 🔧 DATE FORMAT
 function formatDate(dateStr) {
   if (!dateStr) return "";
   let d = new Date(dateStr);
@@ -20,7 +21,9 @@ function formatDate(dateStr) {
   return `${day}/${month}/${year}`;
 }
 
+// =====================
 // 🔥 EXPIRY
+// =====================
 function getExpiryStatus(calDate, validity) {
   if (!calDate || !validity) {
     return { expiry: "-", label: "OK", class: "", priority: 3 };
@@ -55,13 +58,17 @@ function getExpiryStatus(calDate, validity) {
   };
 }
 
+// =====================
 // 🔥 FILTER
+// =====================
 function setFilter(type) {
   currentFilter = type;
   loadData();
 }
 
+// =====================
 // 🔥 LOAD DATA
+// =====================
 function loadData() {
 
   db.collection("equipment").onSnapshot(snapshot => {
@@ -101,7 +108,7 @@ function loadData() {
       if (item.status.label === "EXPIRED") labelClass = "label-expired";
       else if (item.status.label === "DUE SOON") labelClass = "label-warning";
 
-      // 🔥 RECEIPT
+      // 📄 RECEIPT
       let receiptHTML = "-";
       if (item.receiptUrl) {
         if (item.receiptUrl.match(/\.(jpg|jpeg|png)$/i)) {
@@ -111,7 +118,7 @@ function loadData() {
         }
       }
 
-      // 🔥 CERTIFICATE
+      // 🧾 CERTIFICATE
       let certHTML = "-";
       if (item.certUrl) {
         if (item.certUrl.match(/\.(jpg|jpeg|png)$/i)) {
@@ -145,26 +152,24 @@ function loadData() {
 
     table.innerHTML = html;
 
-    document.getElementById("totalItems").innerText = data.length;
-    document.getElementById("totalValue").innerText =
-      total.toLocaleString(undefined, { minimumFractionDigits: 2 });
+    totalItems.innerText = data.length;
+    totalValue.innerText = total.toLocaleString(undefined, { minimumFractionDigits: 2 });
 
-    if (!alertShown && (expiredCount > 0 || dueSoonCount > 0)) {
-      let message = "";
-      if (expiredCount > 0) message += `❌ ${expiredCount} EXPIRED\n`;
-      if (dueSoonCount > 0) message += `⚠️ ${dueSoonCount} DUE SOON\n`;
-      alert(message);
+    if (!alertShown && (expiredCount || dueSoonCount)) {
+      alert(`❌ ${expiredCount} expired\n⚠️ ${dueSoonCount} due soon`);
       alertShown = true;
     }
 
   });
 }
 
+// =====================
 // 🔥 ADD / UPDATE
+// =====================
 function addEquipment() {
 
-  let receiptFile = document.getElementById("receiptFile").files[0];
-  let certFile = document.getElementById("certFile").files[0];
+  let receiptFile = receiptFileInput.files[0];
+  let certFile = certFileInput.files[0];
 
   let newItem = {
     tag: tag.value.trim(),
@@ -181,14 +186,16 @@ function addEquipment() {
   };
 
   if (!newItem.tag || !newItem.desc) {
-    alert("Please fill Tagging & Description");
+    alert("Fill Tag & Description");
     return;
   }
 
   uploadFiles(newItem, receiptFile, certFile);
 }
 
-// 🔥 UPLOAD FUNCTION
+// =====================
+// 🔥 UPLOAD
+// =====================
 function uploadFiles(item, receiptFile, certFile) {
 
   let tasks = [];
@@ -230,7 +237,9 @@ function uploadFiles(item, receiptFile, certFile) {
   });
 }
 
+// =====================
 // ✏️ EDIT
+// =====================
 function editItem(id) {
   db.collection("equipment").doc(id).get().then(doc => {
     let item = doc.data();
@@ -249,14 +258,18 @@ function editItem(id) {
   });
 }
 
+// =====================
 // 🗑 DELETE
+// =====================
 function deleteItem(id) {
   if (confirm("Delete this item?")) {
     db.collection("equipment").doc(id).delete();
   }
 }
 
+// =====================
 // 🔍 SEARCH
+// =====================
 function searchTable() {
   let input = search.value.toLowerCase();
   let rows = document.querySelectorAll("#tableBody tr");
@@ -266,7 +279,9 @@ function searchTable() {
   });
 }
 
+// =====================
 // 📥 EXPORT
+// =====================
 function exportToExcel() {
   let rows = document.querySelectorAll("table tr");
   let csv = [];
@@ -285,7 +300,9 @@ function exportToExcel() {
   a.click();
 }
 
+// =====================
 // 🧹 CLEAR
+// =====================
 function clearForm() {
   tag.value = "";
   desc.value = "";
@@ -296,11 +313,85 @@ function clearForm() {
   qty.value = "";
   price.value = "";
   date.value = "";
-  document.getElementById("receiptFile").value = "";
-  document.getElementById("certFile").value = "";
+  receiptFile.value = "";
+  certFile.value = "";
 }
 
-// 🚀 START
+// =====================
+// 🖼 MODAL + ZOOM
+// =====================
+let modal = document.getElementById("imageModal");
+let modalImg = document.getElementById("modalImg");
+
+let scale = 1;
+let posX = 0, posY = 0;
+let isDragging = false;
+let startX, startY;
+
+function openModal(src) {
+  modal.style.display = "block";
+  modalImg.src = src;
+
+  scale = 1;
+  posX = 0;
+  posY = 0;
+  updateTransform();
+}
+
+function closeModal() {
+  modal.style.display = "none";
+}
+
+// zoom mouse
+modalImg.addEventListener("wheel", e => {
+  e.preventDefault();
+  scale += e.deltaY * -0.001;
+  scale = Math.min(Math.max(1, scale), 5);
+  updateTransform();
+});
+
+// drag
+modalImg.addEventListener("mousedown", e => {
+  isDragging = true;
+  startX = e.clientX - posX;
+  startY = e.clientY - posY;
+});
+
+document.addEventListener("mousemove", e => {
+  if (!isDragging) return;
+  posX = e.clientX - startX;
+  posY = e.clientY - startY;
+  updateTransform();
+});
+
+document.addEventListener("mouseup", () => isDragging = false);
+
+// mobile pinch
+let initialDistance = null;
+
+modalImg.addEventListener("touchmove", e => {
+  if (e.touches.length === 2) {
+    let dx = e.touches[0].clientX - e.touches[1].clientX;
+    let dy = e.touches[0].clientY - e.touches[1].clientY;
+    let distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (!initialDistance) initialDistance = distance;
+
+    let zoom = distance / initialDistance;
+    scale = Math.min(Math.max(1, zoom), 5);
+    updateTransform();
+  }
+});
+
+modalImg.addEventListener("touchend", () => {
+  initialDistance = null;
+});
+
+function updateTransform() {
+  modalImg.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+}
+
+// =====================
 window.onload = function () {
   loadData();
 };

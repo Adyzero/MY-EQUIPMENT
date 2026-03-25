@@ -63,11 +63,32 @@
       border: 1px solid #ccc;
     }
 
+    /* 🔵 RECEIPT STYLE */
+    .receipt-box input {
+      border: 2px solid #1e88e5;
+      background: #f0f7ff;
+    }
+
+    /* 🟡 CERT STYLE */
+    .cert-box input {
+      border: 2px solid #f4b400;
+      background: #fff8e1;
+    }
+
+    .file-label {
+      font-size: 13px;
+      font-weight: bold;
+      display: block;
+      margin-bottom: 3px;
+    }
+
     .file-info {
       font-size: 12px;
-      color: #555;
-      margin-top: 5px;
+      margin-top: 3px;
     }
+
+    .blue { color:#1e88e5; }
+    .yellow { color:#f4b400; }
 
     button {
       padding: 10px 15px;
@@ -141,12 +162,10 @@
       position: absolute;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%) scale(1);
+      transform: translate(-50%, -50%);
       max-width: 90%;
       max-height: 90%;
       border-radius: 10px;
-      cursor: grab;
-      touch-action: none;
     }
 
     .close {
@@ -204,15 +223,21 @@
       <input id="price" placeholder="Price (RM)">
       <input type="date" id="date">
 
-      <!-- RECEIPT -->
-      <input type="file" id="receiptFile" onchange="showFileName()">
+      <!-- 🔵 RECEIPT -->
+      <div class="receipt-box">
+        <span class="file-label blue">📄 Receipt</span>
+        <input type="file" id="receiptFile" onchange="showFileName()">
+        <div id="fileName" class="file-info blue">No receipt selected</div>
+      </div>
 
-      <!-- CERTIFICATE -->
-      <input type="file" id="certFile" onchange="showCertName()">
+      <!-- 🟡 CERTIFICATE -->
+      <div class="cert-box">
+        <span class="file-label yellow">🧾 Calibration Certificate</span>
+        <input type="file" id="certFile" onchange="showCertName()">
+        <div id="certName" class="file-info yellow">No certificate selected</div>
+      </div>
+
     </div>
-
-    <div class="file-info" id="fileName">No receipt selected</div>
-    <div class="file-info" id="certName">No certificate selected</div>
 
     <br>
 
@@ -284,19 +309,15 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const storage = firebase.storage();
-</script>
 
-<script>
 function showFileName() {
-  let file = document.getElementById("receiptFile").files[0];
-  document.getElementById("fileName").innerText =
-    file ? "Receipt: " + file.name : "No receipt selected";
+  let f = receiptFile.files[0];
+  fileName.innerText = f ? "Receipt: " + f.name : "No receipt selected";
 }
 
 function showCertName() {
-  let file = document.getElementById("certFile").files[0];
-  document.getElementById("certName").innerText =
-    file ? "Certificate: " + file.name : "No certificate selected";
+  let f = certFile.files[0];
+  certName.innerText = f ? "Certificate: " + f.name : "No certificate selected";
 }
 </script>
 
