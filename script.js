@@ -8,18 +8,24 @@ function loadData() {
 
     snapshot.forEach(doc => {
       let item = doc.data();
+      let id = doc.id; // 🔥 important
 
       let row =
         "<tr>" +
         "<td>" + i++ + "</td>" +
-        "<td>" + item.tag + "</td>" +
-        "<td>" + item.desc + "</td>" +
-        "<td>" + item.serial + "</td>" +
-        "<td>" + item.cal + "</td>" +
-        "<td>" + item.qty + "</td>" +
-        "<td>" + item.price + "</td>" +
-        "<td>" + item.date + "</td>" +
-        "<td>-</td>" +
+        "<td>" + (item.tag || "") + "</td>" +
+        "<td>" + (item.desc || "") + "</td>" +
+        "<td>" + (item.serial || "") + "</td>" +
+        "<td>" + (item.cal || "") + "</td>" +
+        "<td>" + (item.qty || "") + "</td>" +
+        "<td>" + (item.price || "") + "</td>" +
+        "<td>" + (item.date || "") + "</td>" +
+
+        "<td>" +
+        "<button class='btn-edit' onclick='editItem(\"" + id + "\")'>✏️</button> " +
+        "<button class='btn-delete' onclick='deleteItem(\"" + id + "\")'>🗑</button>" +
+        "</td>" +
+
         "</tr>";
 
       table.innerHTML += row;
@@ -67,3 +73,34 @@ function searchTable() {
 window.onload = function () {
   loadData();
 };
+
+function deleteItem(id) {
+
+  if (confirm("Delete this item?")) {
+
+    db.collection("equipment").doc(id).delete().then(() => {
+      loadData();
+    });
+
+  }
+}
+
+function editItem(id) {
+
+  db.collection("equipment").doc(id).get().then(doc => {
+
+    let item = doc.data();
+
+    document.getElementById("tag").value = item.tag || "";
+    document.getElementById("desc").value = item.desc || "";
+    document.getElementById("serial").value = item.serial || "";
+    document.getElementById("cal").value = item.cal || "";
+    document.getElementById("qty").value = item.qty || "";
+    document.getElementById("price").value = item.price || "";
+    document.getElementById("date").value = item.date || "";
+
+    // delete old then user re-add
+    deleteItem(id);
+
+  });
+}
