@@ -59,26 +59,33 @@ function loadSetDropdown() {
 // ==========================
 function addEquipment() {
 
-  let setId = setSelect.value;
-  if (!setId) return alert("Select set");
+  let setId = document.getElementById("setSelect").value;
+  if (!setId) {
+    alert("Select equipment set");
+    return;
+  }
 
   let item = {
-    tag: tag.value,
-    desc: desc.value,
-    resit: resit.value,
-    qty: qty.value,
-    price: price.value,
-    cal: cal.value,
-    validity: validity.value,
-    date: date.value,
+    tag: document.getElementById("tag").value.trim(),
+    desc: document.getElementById("desc").value.trim(),
+    resit: document.getElementById("resit").value.trim(),
+    qty: document.getElementById("qty").value.trim(),
+    price: document.getElementById("price").value.trim(),
+    cal: document.getElementById("cal").value,
+    validity: document.getElementById("validity").value,
+    date: document.getElementById("date").value,
     receiptUrl: "",
     certUrl: ""
   };
 
-  if (!item.tag || !item.desc) return alert("Fill Tag & Description");
+  // ✅ validation
+  if (!item.tag || !item.desc) {
+    alert("Please fill Tag & Description");
+    return;
+  }
 
-  let receiptFile = receiptFileInput.files[0];
-  let certFile = certFileInput.files[0];
+  let receiptFile = document.getElementById("receiptFile").files[0];
+  let certFile = document.getElementById("certFile").files[0];
 
   uploadFiles(item, receiptFile, certFile, setId);
 }
@@ -208,7 +215,16 @@ function loadData() {
 
 // ==========================
 function clearForm() {
-  document.querySelectorAll("input").forEach(i => i.value = "");
+  document.getElementById("tag").value = "";
+  document.getElementById("desc").value = "";
+  document.getElementById("resit").value = "";
+  document.getElementById("qty").value = "";
+  document.getElementById("price").value = "";
+  document.getElementById("cal").value = "";
+  document.getElementById("validity").value = "";
+  document.getElementById("date").value = "";
+  document.getElementById("receiptFile").value = "";
+  document.getElementById("certFile").value = "";
 }
 
 // ==========================
