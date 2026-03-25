@@ -80,29 +80,34 @@ function loadSetDropdown() {
 }
 
 // ==========================
-// ➕ ADD ITEM
+// ➕ ADD ITEM (🔥 FIXED)
 // ==========================
 function addEquipment() {
 
   let setId = setSelect.value;
-
   if (!setId) return alert("Select equipment set");
 
-  let receiptFile = document.getElementById("receiptFile").files[0];
-  let certFile = document.getElementById("certFile").files[0];
-
   let item = {
-    tag: tag.value,
-    desc: desc.value,
-    resit: resit.value,
-    qty: qty.value,
-    price: price.value,
-    cal: cal.value,
-    validity: validity.value,
-    date: date.value,
+    tag: document.getElementById("tag").value,
+    desc: document.getElementById("desc").value,
+    resit: document.getElementById("resit").value,
+    qty: document.getElementById("qty").value,
+    price: document.getElementById("price").value,
+    cal: document.getElementById("cal").value,
+    validity: document.getElementById("validity").value,
+    date: document.getElementById("date").value,
     receiptUrl: "",
     certUrl: ""
   };
+
+  // 🔥 validation
+  if (!item.tag || !item.desc) {
+    alert("Please fill Tag & Description");
+    return;
+  }
+
+  let receiptFile = document.getElementById("receiptFile").files[0];
+  let certFile = document.getElementById("certFile").files[0];
 
   uploadFiles(item, receiptFile, certFile, setId);
 }
@@ -154,7 +159,7 @@ function toggleSet(id) {
 }
 
 // ==========================
-// 🗑 DELETE SET (🔥 NEW)
+// 🗑 DELETE SET
 // ==========================
 function deleteSet(setId) {
 
@@ -179,7 +184,7 @@ function deleteSet(setId) {
 }
 
 // ==========================
-// 🔥 LOAD DATA (GROUPED)
+// 🔥 LOAD DATA
 // ==========================
 function loadData() {
 
@@ -192,9 +197,8 @@ function loadData() {
       let set = setDoc.data();
       let setId = setDoc.id;
 
-      // 🔥 GROUP HEADER WITH DELETE BUTTON
       table.innerHTML += `
-        <tr class="group-row">
+        <tr class="group-row" onclick="toggleSet('${setId}')">
           <td colspan="10">
             ▶ <b>${set.name} (${set.serial})</b>
 
@@ -277,19 +281,19 @@ function searchTable() {
 }
 
 // ==========================
-// 🧹 CLEAR FORM
+// 🧹 CLEAR FORM (🔥 FIXED)
 // ==========================
 function clearForm() {
-  tag.value = "";
-  desc.value = "";
-  resit.value = "";
-  qty.value = "";
-  price.value = "";
-  cal.value = "";
-  validity.value = "";
-  date.value = "";
-  receiptFile.value = "";
-  certFile.value = "";
+  document.getElementById("tag").value = "";
+  document.getElementById("desc").value = "";
+  document.getElementById("resit").value = "";
+  document.getElementById("qty").value = "";
+  document.getElementById("price").value = "";
+  document.getElementById("cal").value = "";
+  document.getElementById("validity").value = "";
+  document.getElementById("date").value = "";
+  document.getElementById("receiptFile").value = "";
+  document.getElementById("certFile").value = "";
 }
 
 // ==========================
