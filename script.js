@@ -1,44 +1,85 @@
 let table = document.getElementById("tableBody");
 let editId = null;
 
-// 🔧 Helper: clean price (remove comma, convert to number)
+// 🔧 Helper: clean price
 function parsePrice(value) {
   if (!value) return 0;
   return parseFloat(value.toString().replace(/,/g, "")) || 0;
 }
 
-// 🔥 REAL-TIME LOAD
+// 🔥 EXPIRY CHECK
+function getStatus(cal) {
+
+  if (!cal) return { class: "", label: "OK", priority: 3 };
+
+  let parts = cal.split("/");
+  if (parts.length !== 3) return { class: "", label: "OK", priority: 3 };
+
+  let date = new Date(parts[2], parts[1] - 1, parts[0]);
+
+  let expiry = new Date(date);
+  expiry.setFullYear(expiry.getFullYear() + 1);
+
+  let today = new Date();
+  let diff = (expiry - today) / (1000 * 60 * 60 * 24);
+
+  if (diff < 0) return { class: "expired", label: "EXPIRED", priority: 1 };
+  if (diff <= 30) return { class: "warning", label: "DUE SOON", priority: 2 };
+
+  return { class: "", label: "OK", priority: 3 };
+}
+
+// 🔥 REAL-TIME LOAD + SORT
 function loadData() {
 
   db.collection("equipment").onSnapshot(snapshot => {
 
-    let html = "";
-    let i = 1;
+    let data = [];
     let total = 0;
-    let count = 0;
 
     snapshot.forEach(doc => {
       let item = doc.data();
-      let id = doc.id;
+      item.id = doc.id;
 
-      count++;
+      item.status = getStatus(item.cal);
+      item.priceValue = parsePrice(item.price);
 
-      let price = parsePrice(item.price);
-      total += price;
+      total += item.priceValue;
+
+      data.push(item);
+    });
+
+    // 🔥 SORT by priority (expired first)
+    data.sort((a, b) => a.status.priority - b.status.priority);
+
+    let html = "";
+
+    data.forEach((item, index) => {
+
+      let label = "";
+
+      if (item.status.label === "EXPIRED") {
+        label = `<span class="label label-expired">EXPIRED</span>`;
+      } else if (item.status.label === "DUE SOON") {
+        label = `<span class="label label-warning">DUE SOON</span>`;
+      } else {
+        label = `<span class="label label-ok">OK</span>`;
+      }
 
       html += `
-        <tr>
-          <td>${i++}</td>
+        <tr class="${item.status.class}">
+          <td>${index + 1}</td>
           <td>${item.tag || ""}</td>
           <td>${item.desc || ""}</td>
           <td>${item.serial || ""}</td>
           <td>${item.cal || ""}</td>
+          <td>${label}</td>
           <td>${item.qty || ""}</td>
           <td>${item.price || ""}</td>
           <td>${item.date || ""}</td>
           <td>
-            <button class="btn-edit" onclick="editItem('${id}')">✏️</button>
-            <button class="btn-delete" onclick="deleteItem('${id}')">🗑</button>
+            <button class="btn-edit" onclick="editItem('${item.id}')">✏️</button>
+            <button class="btn-delete" onclick="deleteItem('${item.id}')">🗑</button>
           </td>
         </tr>
       `;
@@ -46,16 +87,10 @@ function loadData() {
 
     table.innerHTML = html;
 
-    // 📊 DASHBOARD UPDATE
-    let totalItems = document.getElementById("totalItems");
-    let totalValue = document.getElementById("totalValue");
-
-    if (totalItems && totalValue) {
-      totalItems.innerText = count;
-      totalValue.innerText = total.toLocaleString(undefined, {
-        minimumFractionDigits: 2
-      });
-    }
+    // 📊 DASHBOARD
+    document.getElementById("totalItems").innerText = data.length;
+    document.getElementById("totalValue").innerText =
+      total.toLocaleString(undefined, { minimumFractionDigits: 2 });
 
   });
 }
@@ -73,20 +108,17 @@ function addEquipment() {
     date: document.getElementById("date").value.trim()
   };
 
-  // ❗ Basic validation
   if (!newItem.tag || !newItem.desc) {
-    alert("Please fill at least Tagging & Description");
+    alert("Please fill Tagging & Description");
     return;
   }
 
   if (editId) {
-    // ✏️ UPDATE
     db.collection("equipment").doc(editId).update(newItem).then(() => {
       editId = null;
       clearForm();
     });
   } else {
-    // ➕ ADD
     db.collection("equipment").add(newItem).then(() => {
       clearForm();
     });
@@ -122,6 +154,7 @@ function deleteItem(id) {
 
 // 🔍 SEARCH
 function searchTable() {
+
   let input = document.getElementById("search").value.toLowerCase();
   let rows = document.querySelectorAll("#tableBody tr");
 

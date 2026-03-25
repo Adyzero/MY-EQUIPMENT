@@ -3,7 +3,7 @@
 <head>
   <title>MY-EQUIPMENT</title>
 
-  <!-- 🔥 FONT -->
+  <!-- FONT -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
   <style>
@@ -33,7 +33,7 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
-    /* 🔥 DASHBOARD */
+    /* DASHBOARD */
     .dashboard {
       display: flex;
       gap: 20px;
@@ -47,15 +47,10 @@
       text-align: center;
     }
 
-    .box-blue {
-      background: #1f4e79;
-    }
+    .box-blue { background: #1f4e79; }
+    .box-green { background: #28a745; }
 
-    .box-green {
-      background: #28a745;
-    }
-
-    /* 🔥 FORM GRID */
+    /* FORM */
     .form-grid {
       display: flex;
       flex-wrap: wrap;
@@ -69,7 +64,7 @@
       border: 1px solid #ccc;
     }
 
-    /* 🔥 BUTTON */
+    /* BUTTON */
     button {
       padding: 10px 15px;
       border: none;
@@ -78,35 +73,22 @@
       font-weight: bold;
     }
 
-    .btn-add {
-      background-color: #28a745;
-      color: white;
-    }
+    .btn-add { background: #28a745; color: white; }
+    .btn-add:hover { background: #218838; }
 
-    .btn-add:hover {
-      background-color: #218838;
-    }
+    .btn-edit { background: #ffc107; margin-right: 5px; }
+    .btn-delete { background: #dc3545; color: white; }
 
-    .btn-edit {
-      background-color: #ffc107;
-      margin-right: 5px;
-    }
-
-    .btn-delete {
-      background-color: #dc3545;
-      color: white;
-    }
-
-    /* 🔥 TABLE */
+    /* TABLE */
     table {
       width: 100%;
       border-collapse: collapse;
     }
 
     th {
-      background-color: #1f4e79;
+      background: #1f4e79;
       color: white;
-      padding: 12px;
+      padding: 10px;
     }
 
     td {
@@ -119,7 +101,39 @@
       background-color: #f5f5f5;
     }
 
-    /* 🔥 SEARCH */
+    /* 🔴 EXPIRY COLORS */
+    .expired {
+      background-color: #ffcccc !important;
+    }
+
+    .warning {
+      background-color: #fff3cd !important;
+    }
+
+    /* LABEL */
+    .label {
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .label-expired {
+      background: red;
+      color: white;
+    }
+
+    .label-warning {
+      background: orange;
+      color: white;
+    }
+
+    .label-ok {
+      background: green;
+      color: white;
+    }
+
+    /* SEARCH */
     .search-box {
       width: 100%;
       padding: 12px;
@@ -132,98 +146,99 @@
 
 <body>
 
-  <div class="container">
+<div class="container">
 
-    <h1>MY-EQUIPMENT</h1>
+  <h1>MY-EQUIPMENT</h1>
 
-    <!-- 📊 DASHBOARD -->
-    <div class="card dashboard">
-      <div class="box box-blue">
-        <h4>Total Equipment</h4>
-        <h2 id="totalItems">0</h2>
-      </div>
-
-      <div class="box box-green">
-        <h4>Total Asset Value (RM)</h4>
-        <h2 id="totalValue">0.00</h2>
-      </div>
+  <!-- DASHBOARD -->
+  <div class="card dashboard">
+    <div class="box box-blue">
+      <h4>Total Equipment</h4>
+      <h2 id="totalItems">0</h2>
     </div>
 
-    <!-- 🔍 SEARCH -->
-    <div class="card">
-      <input 
-        type="text" 
-        id="search" 
-        class="search-box"
-        placeholder="🔍 Search equipment..."
-        onkeyup="searchTable()">
+    <div class="box box-green">
+      <h4>Total Asset Value (RM)</h4>
+      <h2 id="totalValue">0.00</h2>
     </div>
-
-    <!-- ➕ ADD FORM -->
-    <div class="card">
-      <h3>Add New Equipment</h3>
-
-      <div class="form-grid">
-        <input type="text" id="tag" placeholder="Tagging No.">
-        <input type="text" id="desc" placeholder="Description">
-        <input type="text" id="serial" placeholder="Serial">
-        <input type="text" id="cal" placeholder="Calibration">
-        <input type="text" id="qty" placeholder="Quantity">
-        <input type="text" id="price" placeholder="Price">
-        <input type="text" id="date" placeholder="Date">
-      </div>
-
-      <br>
-
-      <button class="btn-add" onclick="addEquipment()">➕ Add Equipment</button>
-    </div>
-
-    <!-- 📊 TABLE -->
-    <div class="card">
-      <button onclick="exportToExcel()" class="btn-add">📥 Export to Excel</button>
-      <br><br>
-
-      <table>
-        <thead>
-          <tr>
-            <th>No.</th>
-            <th>Tagging</th>
-            <th>Description</th>
-            <th>Serial</th>
-            <th>Calibration</th>
-            <th>Qty</th>
-            <th>Price</th>
-            <th>Date</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-
-        <tbody id="tableBody"></tbody>
-      </table>
-    </div>
-
   </div>
 
-  <!-- 🔥 FIREBASE -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <!-- SEARCH -->
+  <div class="card">
+    <input 
+      type="text" 
+      id="search" 
+      class="search-box"
+      placeholder="🔍 Search equipment..."
+      onkeyup="searchTable()">
+  </div>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyD8aMwAusxC5CvUYC-k0aMvRZTdDK58CBM",
-      authDomain: "my-equipment-a340b.firebaseapp.com",
-      projectId: "my-equipment-a340b",
-      storageBucket: "my-equipment-a340b.firebasestorage.app",
-      messagingSenderId: "982115556344",
-      appId: "1:982115556344:web:eb38ad84cf35cd6507140d"
-    };
+  <!-- FORM -->
+  <div class="card">
+    <h3>Add / Edit Equipment</h3>
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-  </script>
+    <div class="form-grid">
+      <input id="tag" placeholder="Tagging No.">
+      <input id="desc" placeholder="Description">
+      <input id="serial" placeholder="Serial">
+      <input id="cal" placeholder="Calibration (DD/MM/YYYY)">
+      <input id="qty" placeholder="Quantity">
+      <input id="price" placeholder="Price (RM)">
+      <input id="date" placeholder="Date">
+    </div>
 
-  <!-- 🔥 YOUR JS -->
-  <script src="script.js"></script>
+    <br>
+
+    <button class="btn-add" onclick="addEquipment()">➕ Save Equipment</button>
+  </div>
+
+  <!-- TABLE -->
+  <div class="card">
+    <button onclick="exportToExcel()" class="btn-add">📥 Export to Excel</button>
+    <br><br>
+
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Tag</th>
+          <th>Description</th>
+          <th>Serial</th>
+          <th>Calibration</th>
+          <th>Status</th>
+          <th>Qty</th>
+          <th>Price</th>
+          <th>Date</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyD8aMwAusxC5CvUYC-k0aMvRZTdDK58CBM",
+  authDomain: "my-equipment-a340b.firebaseapp.com",
+  projectId: "my-equipment-a340b",
+  storageBucket: "my-equipment-a340b.firebasestorage.app",
+  messagingSenderId: "982115556344",
+  appId: "1:982115556344:web:eb38ad84cf35cd6507140d"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+</script>
+
+<!-- YOUR JS -->
+<script src="script.js"></script>
 
 </body>
 </html>
