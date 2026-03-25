@@ -101,7 +101,7 @@
       background-color: #f5f5f5;
     }
 
-    /* 🔴 EXPIRY COLORS */
+    /* EXPIRY COLORS */
     .expired {
       background-color: #ffcccc !important;
     }
@@ -118,20 +118,9 @@
       font-weight: bold;
     }
 
-    .label-expired {
-      background: red;
-      color: white;
-    }
-
-    .label-warning {
-      background: orange;
-      color: white;
-    }
-
-    .label-ok {
-      background: green;
-      color: white;
-    }
+    .label-expired { background: red; color: white; }
+    .label-warning { background: orange; color: white; }
+    .label-ok { background: green; color: white; }
 
     /* SEARCH */
     .search-box {
@@ -181,10 +170,18 @@
       <input id="tag" placeholder="Tagging No.">
       <input id="desc" placeholder="Description">
       <input id="serial" placeholder="Serial">
-      <input id="cal" placeholder="Calibration (DD/MM/YYYY)">
+
+      <!-- 🔥 DATE PICKER -->
+      <input type="date" id="cal">
+
+      <!-- 🔥 VALIDITY (years) -->
+      <input type="number" id="validity" placeholder="Validity (Years)" min="1" max="5">
+
       <input id="qty" placeholder="Quantity">
       <input id="price" placeholder="Price (RM)">
-      <input id="date" placeholder="Date">
+
+      <!-- OPTIONAL PURCHASE DATE -->
+      <input type="date" id="date">
     </div>
 
     <br>
@@ -204,7 +201,7 @@
           <th>Tag</th>
           <th>Description</th>
           <th>Serial</th>
-          <th>Calibration</th>
+          <th>Expiry Date</th> <!-- 🔥 UPDATED -->
           <th>Status</th>
           <th>Qty</th>
           <th>Price</th>
