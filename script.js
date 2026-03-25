@@ -22,7 +22,7 @@ function formatDate(dateStr) {
   return `${day}/${month}/${year}`;
 }
 
-// 🔥 EXPIRY LOGIC
+// 🔥 EXPIRY
 function getExpiryStatus(calDate, validity) {
 
   if (!calDate || !validity) {
@@ -31,7 +31,6 @@ function getExpiryStatus(calDate, validity) {
 
   let cal = new Date(calDate);
   let expiry = new Date(cal);
-
   expiry.setFullYear(expiry.getFullYear() + parseInt(validity));
 
   let today = new Date();
@@ -45,8 +44,7 @@ function getExpiryStatus(calDate, validity) {
     label = "EXPIRED";
     cssClass = "expired";
     priority = 1;
-  } 
-  else if (diffDays <= 30) {
+  } else if (diffDays <= 30) {
     label = "DUE SOON";
     cssClass = "warning";
     priority = 2;
@@ -66,7 +64,7 @@ function setFilter(type) {
   loadData();
 }
 
-// 🔥 LOAD DATA
+// 🔥 LOAD
 function loadData() {
 
   db.collection("equipment").onSnapshot(snapshot => {
@@ -82,7 +80,6 @@ function loadData() {
       item.id = doc.id;
 
       let result = getExpiryStatus(item.cal, item.validity);
-
       item.expiry = result.expiry;
       item.status = result;
 
@@ -115,7 +112,6 @@ function loadData() {
           <td>${item.serial || ""}</td>
           <td>${item.resit || ""}</td>
 
-          <!-- 🔥 RECEIPT COLUMN -->
           <td>
             ${item.receiptUrl 
               ? `<a href="${item.receiptUrl}" target="_blank">📄 View</a>` 
@@ -145,13 +141,8 @@ function loadData() {
 
       let message = "";
 
-      if (expiredCount > 0) {
-        message += `❌ ${expiredCount} equipment EXPIRED\n`;
-      }
-
-      if (dueSoonCount > 0) {
-        message += `⚠️ ${dueSoonCount} equipment DUE SOON\n`;
-      }
+      if (expiredCount > 0) message += `❌ ${expiredCount} equipment EXPIRED\n`;
+      if (dueSoonCount > 0) message += `⚠️ ${dueSoonCount} equipment DUE SOON\n`;
 
       alert(message);
       alertShown = true;
@@ -160,22 +151,22 @@ function loadData() {
   });
 }
 
-// 🔥 SAVE HELPER
-function saveToFirestore(item) {
+// 🔥 SAVE (FIXED)
+function saveData(newItem) {
 
   if (editId) {
-    db.collection("equipment").doc(editId).update(item).then(() => {
+    db.collection("equipment").doc(editId).update(newItem).then(() => {
       editId = null;
       clearForm();
     });
   } else {
-    db.collection("equipment").add(item).then(() => {
+    db.collection("equipment").add(newItem).then(() => {
       clearForm();
     });
   }
 }
 
-// ➕ ADD / UPDATE WITH FILE
+// 🔥 ADD / UPDATE (FIXED RECEIPT)
 function addEquipment() {
 
   let file = document.getElementById("receiptFile").files[0];
@@ -189,8 +180,7 @@ function addEquipment() {
     validity: validity.value,
     qty: qty.value.trim(),
     price: price.value.trim(),
-    date: date.value,
-    receiptUrl: ""
+    date: date.value
   };
 
   if (!newItem.tag || !newItem.desc) {
@@ -198,6 +188,7 @@ function addEquipment() {
     return;
   }
 
+  // 🔥 CASE 1: FILE SELECTED
   if (file) {
 
     let storageRef = storage.ref("receipts/" + Date.now() + "_" + file.name);
@@ -207,14 +198,31 @@ function addEquipment() {
       snapshot.ref.getDownloadURL().then(url => {
 
         newItem.receiptUrl = url;
-        saveToFirestore(newItem);
+        saveData(newItem);
 
       });
 
     });
 
-  } else {
-    saveToFirestore(newItem);
+  } 
+  // 🔥 CASE 2: NO FILE (KEEP OLD RECEIPT)
+  else {
+
+    if (editId) {
+
+      db.collection("equipment").doc(editId).get().then(doc => {
+
+        let oldData = doc.data();
+        newItem.receiptUrl = oldData.receiptUrl || "";
+
+        saveData(newItem);
+
+      });
+
+    } else {
+      newItem.receiptUrl = "";
+      saveData(newItem);
+    }
   }
 }
 
