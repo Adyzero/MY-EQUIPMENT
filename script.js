@@ -1,5 +1,11 @@
 let table = document.getElementById("tableBody");
-let editId = null; // 🔥 track editing
+let editId = null;
+
+// 🔧 Helper: clean price (remove comma, convert to number)
+function parsePrice(value) {
+  if (!value) return 0;
+  return parseFloat(value.toString().replace(/,/g, "")) || 0;
+}
 
 // 🔥 REAL-TIME LOAD
 function loadData() {
@@ -17,54 +23,61 @@ function loadData() {
 
       count++;
 
-      let price = parseFloat(item.price) || 0;
+      let price = parsePrice(item.price);
       total += price;
 
-      html +=
-        "<tr>" +
-        "<td>" + i++ + "</td>" +
-        "<td>" + (item.tag || "") + "</td>" +
-        "<td>" + (item.desc || "") + "</td>" +
-        "<td>" + (item.serial || "") + "</td>" +
-        "<td>" + (item.cal || "") + "</td>" +
-        "<td>" + (item.qty || "") + "</td>" +
-        "<td>" + (item.price || "") + "</td>" +
-        "<td>" + (item.date || "") + "</td>" +
-
-        "<td>" +
-        "<button class='btn-edit' onclick='editItem(\"" + id + "\")'>✏️</button> " +
-        "<button class='btn-delete' onclick='deleteItem(\"" + id + "\")'>🗑</button>" +
-        "</td>" +
-
-        "</tr>";
+      html += `
+        <tr>
+          <td>${i++}</td>
+          <td>${item.tag || ""}</td>
+          <td>${item.desc || ""}</td>
+          <td>${item.serial || ""}</td>
+          <td>${item.cal || ""}</td>
+          <td>${item.qty || ""}</td>
+          <td>${item.price || ""}</td>
+          <td>${item.date || ""}</td>
+          <td>
+            <button class="btn-edit" onclick="editItem('${id}')">✏️</button>
+            <button class="btn-delete" onclick="deleteItem('${id}')">🗑</button>
+          </td>
+        </tr>
+      `;
     });
 
     table.innerHTML = html;
 
-    // 🔥 DASHBOARD UPDATE (if you added dashboard)
+    // 📊 DASHBOARD UPDATE
     let totalItems = document.getElementById("totalItems");
     let totalValue = document.getElementById("totalValue");
 
     if (totalItems && totalValue) {
       totalItems.innerText = count;
-      totalValue.innerText = total.toFixed(2);
+      totalValue.innerText = total.toLocaleString(undefined, {
+        minimumFractionDigits: 2
+      });
     }
 
   });
 }
 
-// ➕ ADD / UPDATE
+// ➕ ADD / ✏️ UPDATE
 function addEquipment() {
 
   let newItem = {
-    tag: document.getElementById("tag").value,
-    desc: document.getElementById("desc").value,
-    serial: document.getElementById("serial").value,
-    cal: document.getElementById("cal").value,
-    qty: document.getElementById("qty").value,
-    price: document.getElementById("price").value,
-    date: document.getElementById("date").value
+    tag: document.getElementById("tag").value.trim(),
+    desc: document.getElementById("desc").value.trim(),
+    serial: document.getElementById("serial").value.trim(),
+    cal: document.getElementById("cal").value.trim(),
+    qty: document.getElementById("qty").value.trim(),
+    price: document.getElementById("price").value.trim(),
+    date: document.getElementById("date").value.trim()
   };
+
+  // ❗ Basic validation
+  if (!newItem.tag || !newItem.desc) {
+    alert("Please fill at least Tagging & Description");
+    return;
+  }
 
   if (editId) {
     // ✏️ UPDATE
@@ -95,7 +108,7 @@ function editItem(id) {
     document.getElementById("price").value = item.price || "";
     document.getElementById("date").value = item.date || "";
 
-    editId = id; // 🔥 store ID
+    editId = id;
   });
 }
 
@@ -103,9 +116,7 @@ function editItem(id) {
 function deleteItem(id) {
 
   if (confirm("Delete this item?")) {
-
     db.collection("equipment").doc(id).delete();
-
   }
 }
 
@@ -120,8 +131,9 @@ function searchTable() {
   });
 }
 
-// 📥 EXPORT
+// 📥 EXPORT CSV
 function exportToExcel() {
+
   let rows = document.querySelectorAll("table tr");
   let csv = [];
 
@@ -129,7 +141,7 @@ function exportToExcel() {
     let cols = row.querySelectorAll("td, th");
     let rowData = [];
 
-    cols.forEach(col => rowData.push(col.innerText));
+    cols.forEach(col => rowData.push(`"${col.innerText}"`));
     csv.push(rowData.join(","));
   });
 

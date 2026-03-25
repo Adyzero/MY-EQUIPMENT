@@ -33,6 +33,28 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
+    /* 🔥 DASHBOARD */
+    .dashboard {
+      display: flex;
+      gap: 20px;
+    }
+
+    .box {
+      flex: 1;
+      padding: 20px;
+      border-radius: 10px;
+      color: white;
+      text-align: center;
+    }
+
+    .box-blue {
+      background: #1f4e79;
+    }
+
+    .box-green {
+      background: #28a745;
+    }
+
     /* 🔥 FORM GRID */
     .form-grid {
       display: flex;
@@ -113,6 +135,19 @@
   <div class="container">
 
     <h1>MY-EQUIPMENT</h1>
+
+    <!-- 📊 DASHBOARD -->
+    <div class="card dashboard">
+      <div class="box box-blue">
+        <h4>Total Equipment</h4>
+        <h2 id="totalItems">0</h2>
+      </div>
+
+      <div class="box box-green">
+        <h4>Total Asset Value (RM)</h4>
+        <h2 id="totalValue">0.00</h2>
+      </div>
+    </div>
 
     <!-- 🔍 SEARCH -->
     <div class="card">
