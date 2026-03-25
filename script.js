@@ -14,17 +14,14 @@ function parsePrice(value) {
 function formatDate(dateStr) {
   if (!dateStr) return "";
   let d = new Date(dateStr);
-
   let day = d.getDate().toString().padStart(2, "0");
   let month = (d.getMonth() + 1).toString().padStart(2, "0");
   let year = d.getFullYear();
-
   return `${day}/${month}/${year}`;
 }
 
 // 🔥 EXPIRY
 function getExpiryStatus(calDate, validity) {
-
   if (!calDate || !validity) {
     return { expiry: "-", label: "OK", class: "", priority: 3 };
   }
@@ -104,22 +101,23 @@ function loadData() {
       if (item.status.label === "EXPIRED") labelClass = "label-expired";
       else if (item.status.label === "DUE SOON") labelClass = "label-warning";
 
-      // 🔥 RECEIPT DISPLAY
+      // 🔥 RECEIPT
       let receiptHTML = "-";
-
       if (item.receiptUrl) {
-        let url = item.receiptUrl.toLowerCase();
-
-        if (url.includes(".jpg") || url.includes(".jpeg") || url.includes(".png")) {
-          receiptHTML = `
-            <img src="${item.receiptUrl}" 
-                 style="width:60px;height:60px;object-fit:cover;border-radius:6px;cursor:pointer"
-                 onclick="openModal('${item.receiptUrl}')">
-          `;
-        } else if (url.includes(".pdf")) {
-          receiptHTML = `<a href="${item.receiptUrl}" target="_blank">📄 View PDF</a>`;
+        if (item.receiptUrl.match(/\.(jpg|jpeg|png)$/i)) {
+          receiptHTML = `<img src="${item.receiptUrl}" style="width:60px;height:60px;cursor:pointer" onclick="openModal('${item.receiptUrl}')">`;
         } else {
-          receiptHTML = `<a href="${item.receiptUrl}" target="_blank">View File</a>`;
+          receiptHTML = `<a href="${item.receiptUrl}" target="_blank">📄 View</a>`;
+        }
+      }
+
+      // 🔥 CERTIFICATE
+      let certHTML = "-";
+      if (item.certUrl) {
+        if (item.certUrl.match(/\.(jpg|jpeg|png)$/i)) {
+          certHTML = `<img src="${item.certUrl}" style="width:60px;height:60px;cursor:pointer" onclick="openModal('${item.certUrl}')">`;
+        } else {
+          certHTML = `<a href="${item.certUrl}" target="_blank">📄 View</a>`;
         }
       }
 
@@ -131,6 +129,7 @@ function loadData() {
           <td>${item.serial || ""}</td>
           <td>${item.resit || ""}</td>
           <td>${receiptHTML}</td>
+          <td>${certHTML}</td>
           <td>${item.expiry}</td>
           <td><span class="label ${labelClass}">${item.status.label}</span></td>
           <td>${item.qty || ""}</td>
@@ -152,8 +151,8 @@ function loadData() {
 
     if (!alertShown && (expiredCount > 0 || dueSoonCount > 0)) {
       let message = "";
-      if (expiredCount > 0) message += `❌ ${expiredCount} equipment EXPIRED\n`;
-      if (dueSoonCount > 0) message += `⚠️ ${dueSoonCount} equipment DUE SOON\n`;
+      if (expiredCount > 0) message += `❌ ${expiredCount} EXPIRED\n`;
+      if (dueSoonCount > 0) message += `⚠️ ${dueSoonCount} DUE SOON\n`;
       alert(message);
       alertShown = true;
     }
@@ -161,24 +160,11 @@ function loadData() {
   });
 }
 
-// 🔥 SAVE
-function saveData(newItem) {
-  if (editId) {
-    db.collection("equipment").doc(editId).update(newItem).then(() => {
-      editId = null;
-      clearForm();
-    });
-  } else {
-    db.collection("equipment").add(newItem).then(() => {
-      clearForm();
-    });
-  }
-}
-
 // 🔥 ADD / UPDATE
 function addEquipment() {
 
-  let file = document.getElementById("receiptFile").files[0];
+  let receiptFile = document.getElementById("receiptFile").files[0];
+  let certFile = document.getElementById("certFile").files[0];
 
   let newItem = {
     tag: tag.value.trim(),
@@ -189,7 +175,9 @@ function addEquipment() {
     validity: validity.value,
     qty: qty.value.trim(),
     price: price.value.trim(),
-    date: date.value
+    date: date.value,
+    receiptUrl: "",
+    certUrl: ""
   };
 
   if (!newItem.tag || !newItem.desc) {
@@ -197,34 +185,49 @@ function addEquipment() {
     return;
   }
 
-  if (file) {
+  uploadFiles(newItem, receiptFile, certFile);
+}
 
-    let storageRef = storage.ref("receipts/" + Date.now() + "_" + file.name);
+// 🔥 UPLOAD FUNCTION
+function uploadFiles(item, receiptFile, certFile) {
 
-    storageRef.put(file).then(snapshot => {
+  let tasks = [];
 
-      snapshot.ref.getDownloadURL().then(url => {
+  if (receiptFile) {
+    let ref = storage.ref("receipts/" + Date.now() + "_" + receiptFile.name);
+    tasks.push(ref.put(receiptFile)
+      .then(s => s.ref.getDownloadURL())
+      .then(url => item.receiptUrl = url));
+  }
 
-        newItem.receiptUrl = url;
-        saveData(newItem);
+  if (certFile) {
+    let ref = storage.ref("certificates/" + Date.now() + "_" + certFile.name);
+    tasks.push(ref.put(certFile)
+      .then(s => s.ref.getDownloadURL())
+      .then(url => item.certUrl = url));
+  }
 
-      });
-
-    });
-
-  } else {
+  Promise.all(tasks).then(() => {
 
     if (editId) {
       db.collection("equipment").doc(editId).get().then(doc => {
-        let oldData = doc.data();
-        newItem.receiptUrl = oldData.receiptUrl || "";
-        saveData(newItem);
+        let old = doc.data();
+
+        item.receiptUrl = item.receiptUrl || old.receiptUrl || "";
+        item.certUrl = item.certUrl || old.certUrl || "";
+
+        db.collection("equipment").doc(editId).update(item).then(() => {
+          editId = null;
+          clearForm();
+        });
       });
     } else {
-      newItem.receiptUrl = "";
-      saveData(newItem);
+      db.collection("equipment").add(item).then(() => {
+        clearForm();
+      });
     }
-  }
+
+  });
 }
 
 // ✏️ EDIT
@@ -259,8 +262,7 @@ function searchTable() {
   let rows = document.querySelectorAll("#tableBody tr");
 
   rows.forEach(row => {
-    let text = row.innerText.toLowerCase();
-    row.style.display = text.includes(input) ? "" : "none";
+    row.style.display = row.innerText.toLowerCase().includes(input) ? "" : "none";
   });
 }
 
@@ -272,16 +274,13 @@ function exportToExcel() {
   rows.forEach(row => {
     let cols = row.querySelectorAll("td, th");
     let rowData = [];
-
     cols.forEach(col => rowData.push(`"${col.innerText}"`));
     csv.push(rowData.join(","));
   });
 
   let blob = new Blob([csv.join("\n")], { type: "text/csv" });
-  let url = window.URL.createObjectURL(blob);
-
   let a = document.createElement("a");
-  a.href = url;
+  a.href = URL.createObjectURL(blob);
   a.download = "MY-EQUIPMENT.csv";
   a.click();
 }
@@ -298,95 +297,7 @@ function clearForm() {
   price.value = "";
   date.value = "";
   document.getElementById("receiptFile").value = "";
-}
-
-// ==========================
-// 🔥 MODAL ZOOM + DRAG + PINCH
-// ==========================
-let scale = 1;
-let translateX = 0;
-let translateY = 0;
-let startX, startY;
-let isDragging = false;
-let lastDistance = 0;
-
-const img = document.getElementById("modalImg");
-
-function openModal(src) {
-  document.getElementById("imageModal").style.display = "block";
-  img.src = src;
-
-  scale = 1;
-  translateX = 0;
-  translateY = 0;
-  updateTransform();
-}
-
-function closeModal() {
-  document.getElementById("imageModal").style.display = "none";
-}
-
-// 🖥 SCROLL ZOOM
-img.addEventListener("wheel", function(e) {
-  e.preventDefault();
-  scale += (e.deltaY < 0 ? 0.1 : -0.1);
-  scale = Math.min(Math.max(1, scale), 5);
-  updateTransform();
-});
-
-// 🖱 DRAG
-img.addEventListener("mousedown", e => {
-  isDragging = true;
-  startX = e.clientX - translateX;
-  startY = e.clientY - translateY;
-});
-
-window.addEventListener("mouseup", () => isDragging = false);
-
-window.addEventListener("mousemove", e => {
-  if (!isDragging) return;
-  translateX = e.clientX - startX;
-  translateY = e.clientY - startY;
-  updateTransform();
-});
-
-// 📱 TOUCH
-img.addEventListener("touchstart", e => {
-  if (e.touches.length === 2) {
-    lastDistance = getDistance(e.touches);
-  }
-  if (e.touches.length === 1) {
-    startX = e.touches[0].clientX - translateX;
-    startY = e.touches[0].clientY - translateY;
-  }
-}, { passive: false });
-
-img.addEventListener("touchmove", e => {
-  e.preventDefault();
-
-  if (e.touches.length === 2) {
-    let dist = getDistance(e.touches);
-    scale += (dist - lastDistance) * 0.005;
-    scale = Math.min(Math.max(1, scale), 5);
-    lastDistance = dist;
-  }
-
-  if (e.touches.length === 1) {
-    translateX = e.touches[0].clientX - startX;
-    translateY = e.touches[0].clientY - startY;
-  }
-
-  updateTransform();
-}, { passive: false });
-
-function getDistance(touches) {
-  let dx = touches[0].clientX - touches[1].clientX;
-  let dy = touches[0].clientY - touches[1].clientY;
-  return Math.sqrt(dx * dx + dy * dy);
-}
-
-function updateTransform() {
-  img.style.transform = `translate(-50%, -50%) scale(${scale}) translate(${translateX}px, ${translateY}px)`;
+  document.getElementById("certFile").value = "";
 }
 
 // 🚀 START

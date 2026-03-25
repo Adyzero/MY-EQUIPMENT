@@ -125,7 +125,7 @@
       border: 1px solid #ccc;
     }
 
-    /* 🔥 MODAL */
+    /* MODAL */
     .modal {
       display: none;
       position: fixed;
@@ -135,7 +135,6 @@
       width: 100%;
       height: 100%;
       background: rgba(0,0,0,0.9);
-      overflow: hidden;
     }
 
     .modal-content {
@@ -157,7 +156,6 @@
       color: white;
       font-size: 35px;
       cursor: pointer;
-      z-index: 1000;
     }
 
   </style>
@@ -206,10 +204,15 @@
       <input id="price" placeholder="Price (RM)">
       <input type="date" id="date">
 
+      <!-- RECEIPT -->
       <input type="file" id="receiptFile" onchange="showFileName()">
+
+      <!-- CERTIFICATE -->
+      <input type="file" id="certFile" onchange="showCertName()">
     </div>
 
-    <div class="file-info" id="fileName">No file selected</div>
+    <div class="file-info" id="fileName">No receipt selected</div>
+    <div class="file-info" id="certName">No certificate selected</div>
 
     <br>
 
@@ -241,6 +244,7 @@
           <th>Serial</th>
           <th>Resit No.</th>
           <th>Receipt</th>
+          <th>Certificate</th>
           <th>Expiry Date</th>
           <th>Status</th>
           <th>Qty</th>
@@ -256,7 +260,7 @@
 
 </div>
 
-<!-- 🔥 MODAL -->
+<!-- MODAL -->
 <div id="imageModal" class="modal">
   <span class="close" onclick="closeModal()">&times;</span>
   <img id="modalImg" class="modal-content">
@@ -285,7 +289,14 @@ const storage = firebase.storage();
 <script>
 function showFileName() {
   let file = document.getElementById("receiptFile").files[0];
-  document.getElementById("fileName").innerText = file ? file.name : "No file selected";
+  document.getElementById("fileName").innerText =
+    file ? "Receipt: " + file.name : "No receipt selected";
+}
+
+function showCertName() {
+  let file = document.getElementById("certFile").files[0];
+  document.getElementById("certName").innerText =
+    file ? "Certificate: " + file.name : "No certificate selected";
 }
 </script>
 
