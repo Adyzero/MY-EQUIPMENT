@@ -149,13 +149,33 @@ function uploadFiles(item, receiptFile, certFile, setId) {
 // 🔽 TOGGLE GROUP
 // ==========================
 function toggleSet(id) {
-
   let rows = document.querySelectorAll(".set-" + id);
+  rows.forEach(r => r.classList.toggle("hidden"));
+}
 
-  rows.forEach(r => {
-    r.classList.toggle("hidden");
+// ==========================
+// 🗑 DELETE SET (🔥 NEW)
+// ==========================
+function deleteSet(setId) {
+
+  if (!confirm("Delete this set and ALL items inside?")) return;
+
+  let setRef = db.collection("equipment_sets").doc(setId);
+
+  setRef.collection("items").get().then(snapshot => {
+
+    let batch = db.batch();
+
+    snapshot.forEach(doc => {
+      batch.delete(doc.ref);
+    });
+
+    batch.commit().then(() => {
+      setRef.delete();
+      alert("Set deleted successfully");
+    });
+
   });
-
 }
 
 // ==========================
@@ -172,11 +192,17 @@ function loadData() {
       let set = setDoc.data();
       let setId = setDoc.id;
 
-      // GROUP HEADER
+      // 🔥 GROUP HEADER WITH DELETE BUTTON
       table.innerHTML += `
-        <tr class="group-row" onclick="toggleSet('${setId}')">
+        <tr class="group-row">
           <td colspan="10">
-            ▶ ${set.name} (${set.serial})
+            ▶ <b>${set.name} (${set.serial})</b>
+
+            <button class="btn-delete"
+              style="float:right"
+              onclick="event.stopPropagation(); deleteSet('${setId}')">
+              🗑 Delete Set
+            </button>
           </td>
         </tr>
       `;
@@ -195,7 +221,7 @@ function loadData() {
             let status = getStatus(item.cal, item.validity);
 
             table.innerHTML += `
-              <tr class="set-${setId} hidden">
+              <tr class="set-${setId}">
                 <td>${i++}</td>
                 <td>${item.tag || ""}</td>
                 <td>${item.desc || ""}</td>
@@ -221,7 +247,7 @@ function loadData() {
 }
 
 // ==========================
-// 🗑 DELETE
+// 🗑 DELETE ITEM
 // ==========================
 function deleteItem(setId, itemId) {
 
