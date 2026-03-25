@@ -123,7 +123,8 @@
 
     <div class="card">
       <button onclick="exportToExcel()" class="btn-add">📥 Export to Excel</button>
-<br><br>
+      <br><br>
+
       <table>
         <thead>
           <tr>
@@ -145,7 +146,25 @@
 
   </div>
 
-  <!-- ✅ SCRIPT MUST BE HERE -->
+  <!-- 🔥 FIREBASE (ADD THIS PART) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD8aMwAusxC5CvUYC-k0aMvRZTdDK58CBM",
+      authDomain: "my-equipment-a340b.firebaseapp.com",
+      projectId: "my-equipment-a340b",
+      storageBucket: "my-equipment-a340b.firebasestorage.app",
+      messagingSenderId: "982115556344",
+      appId: "1:982115556344:web:eb38ad84cf35cd6507140d"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+  </script>
+
+  <!-- YOUR SCRIPT -->
   <script src="script.js"></script>
 
 </body>
