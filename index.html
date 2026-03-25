@@ -5,6 +5,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <!-- FONT -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
   <style>
@@ -76,17 +77,22 @@
       text-align: center;
     }
 
-    /* 🔵 GROUP HEADER */
+    /* GROUP HEADER */
     .group-row {
       background: #d9edf7;
       font-weight: bold;
       cursor: pointer;
     }
 
+    .group-row:hover {
+      background: #cfe8f3;
+    }
+
     .hidden {
       display: none;
     }
 
+    /* STATUS LABEL */
     .label {
       padding: 4px 8px;
       border-radius: 6px;
@@ -128,21 +134,32 @@
 <div class="card">
   <h3>Add Item to Set</h3>
 
+  <label>Select Equipment Set</label><br>
   <select id="setSelect"></select>
 
   <div class="form-grid">
+
     <input id="tag" placeholder="Tag">
     <input id="desc" placeholder="Description">
-    <input id="resit" placeholder="Resit No">
-    <input id="qty" placeholder="Qty">
-    <input id="price" placeholder="Price">
+    <input id="resit" placeholder="Receipt No">
+    <input id="qty" placeholder="Quantity">
+    <input id="price" placeholder="Price (RM)">
 
+    <label>Calibration Date</label>
     <input type="date" id="cal">
-    <input type="number" id="validity" placeholder="Validity (Years)">
+
+    <label>Validity (Years)</label>
+    <input type="number" id="validity">
+
+    <label>Purchase Date</label>
     <input type="date" id="date">
 
+    <label>Upload Receipt</label>
     <input type="file" id="receiptFile">
+
+    <label>Upload Certificate</label>
     <input type="file" id="certFile">
+
   </div>
 
   <br>
@@ -150,14 +167,14 @@
   <button class="btn-add" onclick="addEquipment()">➕ Save Item</button>
 </div>
 
-<!-- SEARCH -->
+<!-- 🔍 SEARCH -->
 <div class="card">
   <input type="text" id="search" class="search-box"
     placeholder="🔍 Search..."
     onkeyup="searchTable()">
 </div>
 
-<!-- TABLE -->
+<!-- 📊 TABLE -->
 <div class="card">
 
 <table>
@@ -166,7 +183,7 @@
       <th>No</th>
       <th>Tag</th>
       <th>Description</th>
-      <th>Resit</th>
+      <th>Receipt</th>
       <th>Expiry</th>
       <th>Status</th>
       <th>Qty</th>
@@ -183,14 +200,14 @@
 
 </div>
 
-<!-- FIREBASE -->
+<!-- 🔥 FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
 <script>
 const firebaseConfig = {
-  apiKey: "YOUR KEY",
+  apiKey: "PASTE-YOUR-REAL-KEY-HERE",
   authDomain: "my-equipment-a340b.firebaseapp.com",
   projectId: "my-equipment-a340b",
   storageBucket: "my-equipment-a340b.firebasestorage.app"
@@ -201,6 +218,7 @@ const db = firebase.firestore();
 const storage = firebase.storage();
 </script>
 
+<!-- YOUR JS -->
 <script src="script.js"></script>
 
 </body>

@@ -2,47 +2,34 @@ let table = document.getElementById("tableBody");
 let setSelect = document.getElementById("setSelect");
 
 // ==========================
-// 🔧 FORMAT DATE
+// FORMAT DATE
 // ==========================
 function formatDate(dateStr) {
   if (!dateStr) return "-";
   let d = new Date(dateStr);
-  let day = String(d.getDate()).padStart(2, "0");
-  let month = String(d.getMonth() + 1).padStart(2, "0");
-  let year = d.getFullYear();
-  return `${day}/${month}/${year}`;
+  return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;
 }
 
 // ==========================
-// 🔥 EXPIRY CALCULATION
+// EXPIRY
 // ==========================
 function getStatus(cal, validity) {
+  if (!cal || !validity) return { expiry: "-", label: "OK", class: "label-ok" };
 
-  if (!cal || !validity) {
-    return { expiry: "-", label: "OK", class: "label-ok" };
-  }
-
-  let calDate = new Date(cal);
-  let expiry = new Date(calDate);
+  let expiry = new Date(cal);
   expiry.setFullYear(expiry.getFullYear() + parseInt(validity));
 
-  let today = new Date();
-  let diff = (expiry - today) / (1000 * 60 * 60 * 24);
+  let diff = (expiry - new Date()) / (1000*60*60*24);
 
-  if (diff < 0) {
-    return { expiry: formatDate(expiry), label: "EXPIRED", class: "label-expired" };
-  } else if (diff <= 30) {
-    return { expiry: formatDate(expiry), label: "DUE SOON", class: "label-warning" };
-  } else {
-    return { expiry: formatDate(expiry), label: "OK", class: "label-ok" };
-  }
+  if (diff < 0) return { expiry: formatDate(expiry), label: "EXPIRED", class: "label-expired" };
+  if (diff <= 30) return { expiry: formatDate(expiry), label: "DUE SOON", class: "label-warning" };
+  return { expiry: formatDate(expiry), label: "OK", class: "label-ok" };
 }
 
 // ==========================
-// ➕ ADD SET
+// ADD SET
 // ==========================
 function addSet() {
-
   let name = document.getElementById("setName").value;
   let serial = document.getElementById("setSerial").value;
 
@@ -55,178 +42,150 @@ function addSet() {
 }
 
 // ==========================
-// 🔽 LOAD SET DROPDOWN
+// LOAD DROPDOWN
 // ==========================
 function loadSetDropdown() {
-
-  db.collection("equipment_sets").onSnapshot(snapshot => {
-
+  db.collection("equipment_sets").onSnapshot(snap => {
     setSelect.innerHTML = "";
-
-    snapshot.forEach(doc => {
-      let set = doc.data();
-
-      let option = document.createElement("option");
-      option.value = doc.id;
-      option.text = `${set.name} (${set.serial})`;
-
-      setSelect.appendChild(option);
+    snap.forEach(doc => {
+      let s = doc.data();
+      setSelect.innerHTML += `<option value="${doc.id}">${s.name} (${s.serial})</option>`;
     });
-
   });
 }
 
 // ==========================
-// ➕ ADD ITEM
+// ADD ITEM
 // ==========================
 function addEquipment() {
 
   let setId = setSelect.value;
-  if (!setId) return alert("Select equipment set");
+  if (!setId) return alert("Select set");
 
   let item = {
-    tag: document.getElementById("tag").value,
-    desc: document.getElementById("desc").value,
-    resit: document.getElementById("resit").value,
-    qty: document.getElementById("qty").value,
-    price: document.getElementById("price").value,
-    cal: document.getElementById("cal").value,
-    validity: document.getElementById("validity").value,
-    date: document.getElementById("date").value,
+    tag: tag.value,
+    desc: desc.value,
+    resit: resit.value,
+    qty: qty.value,
+    price: price.value,
+    cal: cal.value,
+    validity: validity.value,
+    date: date.value,
     receiptUrl: "",
     certUrl: ""
   };
 
-  if (!item.tag || !item.desc) {
-    alert("Please fill Tag & Description");
-    return;
-  }
+  if (!item.tag || !item.desc) return alert("Fill Tag & Description");
 
-  let receiptFile = document.getElementById("receiptFile").files[0];
-  let certFile = document.getElementById("certFile").files[0];
+  let receiptFile = receiptFileInput.files[0];
+  let certFile = certFileInput.files[0];
 
   uploadFiles(item, receiptFile, certFile, setId);
 }
 
 // ==========================
-// 🔥 UPLOAD FILES
+// UPLOAD FILES
 // ==========================
 function uploadFiles(item, receiptFile, certFile, setId) {
 
   let tasks = [];
 
   if (receiptFile) {
-    let ref = storage.ref("receipts/" + Date.now() + "_" + receiptFile.name);
-    tasks.push(
-      ref.put(receiptFile)
-        .then(s => s.ref.getDownloadURL())
-        .then(url => item.receiptUrl = url)
-    );
+    let ref = storage.ref("receipts/" + Date.now());
+    tasks.push(ref.put(receiptFile).then(r=>r.ref.getDownloadURL()).then(u=>item.receiptUrl=u));
   }
 
   if (certFile) {
-    let ref = storage.ref("certificates/" + Date.now() + "_" + certFile.name);
-    tasks.push(
-      ref.put(certFile)
-        .then(s => s.ref.getDownloadURL())
-        .then(url => item.certUrl = url)
-    );
+    let ref = storage.ref("certificates/" + Date.now());
+    tasks.push(ref.put(certFile).then(r=>r.ref.getDownloadURL()).then(u=>item.certUrl=u));
   }
 
-  Promise.all(tasks).then(() => {
-
-    db.collection("equipment_sets")
-      .doc(setId)
-      .collection("items")
-      .add(item)
-      .then(() => clearForm());
-
+  Promise.all(tasks).then(()=>{
+    db.collection("equipment_sets").doc(setId).collection("items").add(item);
+    clearForm();
   });
 }
 
 // ==========================
-// 🔽 TOGGLE GROUP
+// DELETE ITEM (WORKING)
 // ==========================
-function toggleSet(id) {
-  let rows = document.querySelectorAll(".set-" + id);
-  rows.forEach(r => r.classList.toggle("hidden"));
+function deleteItem(setId, itemId) {
+
+  if (!confirm("Delete item?")) return;
+
+  db.collection("equipment_sets")
+    .doc(setId)
+    .collection("items")
+    .doc(itemId)
+    .delete()
+    .then(()=>alert("Deleted"))
+    .catch(err=>alert(err.message));
 }
 
 // ==========================
-// 🗑 DELETE SET
+// DELETE SET
 // ==========================
 function deleteSet(setId) {
 
-  if (!confirm("Delete this set and ALL items inside?")) return;
+  if (!confirm("Delete set + items?")) return;
 
-  let setRef = db.collection("equipment_sets").doc(setId);
+  let ref = db.collection("equipment_sets").doc(setId);
 
-  setRef.collection("items").get().then(snapshot => {
-
+  ref.collection("items").get().then(snap=>{
     let batch = db.batch();
-
-    snapshot.forEach(doc => batch.delete(doc.ref));
-
-    batch.commit().then(() => {
-      setRef.delete();
-      alert("Set deleted");
-    });
-
+    snap.forEach(doc=>batch.delete(doc.ref));
+    batch.commit().then(()=>ref.delete());
   });
 }
 
 // ==========================
-// 🔥 LOAD DATA (REALTIME ITEMS)
+// LOAD DATA (🔥 CLEAN)
 // ==========================
 function loadData() {
 
-  db.collection("equipment_sets").onSnapshot(snapshot => {
+  db.collection("equipment_sets").onSnapshot(setSnap => {
 
-    table.innerHTML = "";
+    let html = "";
 
-    snapshot.forEach(setDoc => {
+    setSnap.forEach(setDoc => {
 
       let set = setDoc.data();
       let setId = setDoc.id;
 
-      table.innerHTML += `
-        <tr class="group-row" onclick="toggleSet('${setId}')">
+      html += `
+        <tr class="group-row">
           <td colspan="10">
             ▶ <b>${set.name} (${set.serial})</b>
-
-            <button class="btn-delete"
-              style="float:right"
+            <button class="btn-delete" style="float:right"
               onclick="event.stopPropagation(); deleteSet('${setId}')">
-              🗑 Delete Set
+              🗑
             </button>
           </td>
         </tr>
       `;
 
-      // 🔥 REALTIME ITEMS (FIXED)
       db.collection("equipment_sets")
         .doc(setId)
         .collection("items")
         .onSnapshot(itemSnap => {
 
-          let html = "";
+          let itemHTML = "";
           let i = 1;
 
           itemSnap.forEach(doc => {
-
             let item = doc.data();
-            let status = getStatus(item.cal, item.validity);
+            let s = getStatus(item.cal, item.validity);
 
-            html += `
-              <tr class="set-${setId}">
+            itemHTML += `
+              <tr>
                 <td>${i++}</td>
-                <td>${item.tag || ""}</td>
-                <td>${item.desc || ""}</td>
-                <td>${item.resit || ""}</td>
-                <td>${status.expiry}</td>
-                <td><span class="label ${status.class}">${status.label}</span></td>
-                <td>${item.qty || ""}</td>
-                <td>${item.price || ""}</td>
+                <td>${item.tag}</td>
+                <td>${item.desc}</td>
+                <td>${item.resit}</td>
+                <td>${s.expiry}</td>
+                <td><span class="${s.class}">${s.label}</span></td>
+                <td>${item.qty}</td>
+                <td>${item.price}</td>
                 <td>${formatDate(item.date)}</td>
                 <td>
                   <button class="btn-delete"
@@ -236,10 +195,9 @@ function loadData() {
                 </td>
               </tr>
             `;
-
           });
 
-          table.innerHTML += html;
+          table.innerHTML = html + itemHTML;
 
         });
 
@@ -249,51 +207,8 @@ function loadData() {
 }
 
 // ==========================
-// 🗑 DELETE ITEM (FIXED)
-// ==========================
-function deleteItem(setId, itemId) {
-
-  console.log("Deleting:", setId, itemId);
-
-  if (!confirm("Delete item?")) return;
-
-  db.collection("equipment_sets")
-    .doc(setId)
-    .collection("items")
-    .doc(itemId)
-    .delete()
-    .then(() => console.log("Deleted OK"))
-    .catch(err => console.error(err));
-}
-
-// ==========================
-// 🔍 SEARCH
-// ==========================
-function searchTable() {
-
-  let input = document.getElementById("search").value.toLowerCase();
-  let rows = document.querySelectorAll("#tableBody tr");
-
-  rows.forEach(row => {
-    row.style.display = row.innerText.toLowerCase().includes(input) ? "" : "none";
-  });
-
-}
-
-// ==========================
-// 🧹 CLEAR FORM
-// ==========================
 function clearForm() {
-  document.getElementById("tag").value = "";
-  document.getElementById("desc").value = "";
-  document.getElementById("resit").value = "";
-  document.getElementById("qty").value = "";
-  document.getElementById("price").value = "";
-  document.getElementById("cal").value = "";
-  document.getElementById("validity").value = "";
-  document.getElementById("date").value = "";
-  document.getElementById("receiptFile").value = "";
-  document.getElementById("certFile").value = "";
+  document.querySelectorAll("input").forEach(i => i.value = "");
 }
 
 // ==========================
