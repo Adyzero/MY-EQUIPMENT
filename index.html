@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>MY-EQUIPMENT</title>
+  <title>MY-EQUIPMENT (GROUPED)</title>
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -33,62 +33,18 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
-    .dashboard {
-      display: flex;
-      gap: 15px;
-      flex-wrap: wrap;
+    input, select {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
     }
-
-    .box {
-      flex: 1;
-      padding: 15px;
-      border-radius: 10px;
-      color: white;
-      text-align: center;
-    }
-
-    .box-blue { background: #1f4e79; }
-    .box-green { background: #28a745; }
 
     .form-grid {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
     }
-
-    .form-grid input {
-      flex: 1 1 180px;
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-
-    /* 🔵 RECEIPT STYLE */
-    .receipt-box input {
-      border: 2px solid #1e88e5;
-      background: #f0f7ff;
-    }
-
-    /* 🟡 CERT STYLE */
-    .cert-box input {
-      border: 2px solid #f4b400;
-      background: #fff8e1;
-    }
-
-    .file-label {
-      font-size: 13px;
-      font-weight: bold;
-      display: block;
-      margin-bottom: 3px;
-    }
-
-    .file-info {
-      font-size: 12px;
-      margin-top: 3px;
-    }
-
-    .blue { color:#1e88e5; }
-    .yellow { color:#f4b400; }
 
     button {
       padding: 10px 15px;
@@ -101,11 +57,6 @@
     .btn-add { background: #28a745; color: white; }
     .btn-edit { background: #ffc107; }
     .btn-delete { background: #dc3545; color: white; }
-
-    .filter-group button {
-      margin-right: 5px;
-      margin-bottom: 5px;
-    }
 
     table {
       width: 100%;
@@ -125,8 +76,16 @@
       text-align: center;
     }
 
-    .expired { background: #ffcccc !important; }
-    .warning { background: #fff3cd !important; }
+    /* 🔵 GROUP HEADER */
+    .group-row {
+      background: #d9edf7;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .hidden {
+      display: none;
+    }
 
     .label {
       padding: 4px 8px;
@@ -146,37 +105,6 @@
       border: 1px solid #ccc;
     }
 
-    /* MODAL */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 999;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.9);
-    }
-
-    .modal-content {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      max-width: 90%;
-      max-height: 90%;
-      border-radius: 10px;
-    }
-
-    .close {
-      position: absolute;
-      top: 15px;
-      right: 25px;
-      color: white;
-      font-size: 35px;
-      cursor: pointer;
-    }
-
   </style>
 </head>
 
@@ -184,111 +112,75 @@
 
 <div class="container">
 
-  <h1>MY-EQUIPMENT</h1>
+<h1>MY-EQUIPMENT (GROUPED)</h1>
 
-  <!-- DASHBOARD -->
-  <div class="card dashboard">
-    <div class="box box-blue">
-      <h4>Total Equipment</h4>
-      <h2 id="totalItems">0</h2>
-    </div>
+<!-- 📦 ADD SET -->
+<div class="card">
+  <h3>Add Equipment Set</h3>
 
-    <div class="box box-green">
-      <h4>Total Asset Value (RM)</h4>
-      <h2 id="totalValue">0.00</h2>
-    </div>
+  <input id="setName" placeholder="Set Name (FLUKE 1732)">
+  <input id="setSerial" placeholder="Serial No">
+
+  <button class="btn-add" onclick="addSet()">➕ Add Set</button>
+</div>
+
+<!-- 📄 ADD ITEM -->
+<div class="card">
+  <h3>Add Item to Set</h3>
+
+  <select id="setSelect"></select>
+
+  <div class="form-grid">
+    <input id="tag" placeholder="Tag">
+    <input id="desc" placeholder="Description">
+    <input id="resit" placeholder="Resit No">
+    <input id="qty" placeholder="Qty">
+    <input id="price" placeholder="Price">
+
+    <input type="date" id="cal">
+    <input type="number" id="validity" placeholder="Validity (Years)">
+    <input type="date" id="date">
+
+    <input type="file" id="receiptFile">
+    <input type="file" id="certFile">
   </div>
 
-  <!-- SEARCH -->
-  <div class="card">
-    <input type="text" id="search" class="search-box"
-      placeholder="🔍 Search equipment..."
-      onkeyup="searchTable()">
-  </div>
+  <br>
 
-  <!-- FORM -->
-  <div class="card">
-    <h3>Add / Edit Equipment</h3>
+  <button class="btn-add" onclick="addEquipment()">➕ Save Item</button>
+</div>
 
-    <div class="form-grid">
-      <input id="tag" placeholder="Tagging No.">
-      <input id="desc" placeholder="Description">
-      <input id="serial" placeholder="Serial">
-      <input id="resit" placeholder="Resit No.">
+<!-- SEARCH -->
+<div class="card">
+  <input type="text" id="search" class="search-box"
+    placeholder="🔍 Search..."
+    onkeyup="searchTable()">
+</div>
 
-      <input type="date" id="cal">
-      <input type="number" id="validity" placeholder="Validity (Years)">
+<!-- TABLE -->
+<div class="card">
 
-      <input id="qty" placeholder="Quantity">
-      <input id="price" placeholder="Price (RM)">
-      <input type="date" id="date">
+<table>
+  <thead>
+    <tr>
+      <th>No</th>
+      <th>Tag</th>
+      <th>Description</th>
+      <th>Resit</th>
+      <th>Expiry</th>
+      <th>Status</th>
+      <th>Qty</th>
+      <th>Price</th>
+      <th>Purchase</th>
+      <th>Action</th>
+    </tr>
+  </thead>
 
-      <!-- 🔵 RECEIPT -->
-      <div class="receipt-box">
-        <span class="file-label blue">📄 Receipt</span>
-        <input type="file" id="receiptFile" onchange="showFileName()">
-        <div id="fileName" class="file-info blue">No receipt selected</div>
-      </div>
-
-      <!-- 🟡 CERTIFICATE -->
-      <div class="cert-box">
-        <span class="file-label yellow">🧾 Calibration Certificate</span>
-        <input type="file" id="certFile" onchange="showCertName()">
-        <div id="certName" class="file-info yellow">No certificate selected</div>
-      </div>
-
-    </div>
-
-    <br>
-
-    <button class="btn-add" onclick="addEquipment()">➕ Save Equipment</button>
-  </div>
-
-  <!-- TABLE -->
-  <div class="card">
-
-    <div class="filter-group">
-      <button onclick="setFilter('ALL')" class="btn-add">All</button>
-      <button onclick="setFilter('EXPIRED')" class="btn-delete">Expired</button>
-      <button onclick="setFilter('DUE SOON')" class="btn-edit">Due Soon</button>
-      <button onclick="setFilter('OK')">OK</button>
-    </div>
-
-    <br>
-
-    <button onclick="exportToExcel()" class="btn-add">📥 Export to Excel</button>
-
-    <br><br>
-
-    <table>
-      <thead>
-        <tr>
-          <th>No</th>
-          <th>Tag</th>
-          <th>Description</th>
-          <th>Serial</th>
-          <th>Resit No.</th>
-          <th>Receipt</th>
-          <th>Certificate</th>
-          <th>Expiry Date</th>
-          <th>Status</th>
-          <th>Qty</th>
-          <th>Price</th>
-          <th>Purchase Date</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-
-      <tbody id="tableBody"></tbody>
-    </table>
-  </div>
+  <tbody id="tableBody"></tbody>
+</table>
 
 </div>
 
-<!-- MODAL -->
-<div id="imageModal" class="modal">
-  <span class="close" onclick="closeModal()">&times;</span>
-  <img id="modalImg" class="modal-content">
 </div>
 
 <!-- FIREBASE -->
@@ -298,27 +190,15 @@
 
 <script>
 const firebaseConfig = {
-  apiKey: "AIzaSy...",
+  apiKey: "YOUR KEY",
   authDomain: "my-equipment-a340b.firebaseapp.com",
   projectId: "my-equipment-a340b",
-  storageBucket: "my-equipment-a340b.firebasestorage.app",
-  messagingSenderId: "982115556344",
-  appId: "1:982115556344:web:eb38ad84cf35cd6507140d"
+  storageBucket: "my-equipment-a340b.firebasestorage.app"
 };
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const storage = firebase.storage();
-
-function showFileName() {
-  let f = receiptFile.files[0];
-  fileName.innerText = f ? "Receipt: " + f.name : "No receipt selected";
-}
-
-function showCertName() {
-  let f = certFile.files[0];
-  certName.innerText = f ? "Certificate: " + f.name : "No certificate selected";
-}
 </script>
 
 <script src="script.js"></script>
