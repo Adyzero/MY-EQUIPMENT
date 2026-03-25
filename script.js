@@ -1,14 +1,15 @@
 let table = document.getElementById("tableBody");
 
 function loadData() {
-  db.collection("equipment").get().then(snapshot => {
+
+  db.collection("equipment").onSnapshot(snapshot => {
 
     table.innerHTML = "";
     let i = 1;
 
     snapshot.forEach(doc => {
       let item = doc.data();
-      let id = doc.id; // 🔥 important
+      let id = doc.id;
 
       let row =
         "<tr>" +
