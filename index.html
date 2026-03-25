@@ -92,7 +92,7 @@
       text-align: center;
     }
 
-    /* STATUS COLORS */
+    /* STATUS */
     .expired { background: #ffcccc !important; }
     .warning { background: #fff3cd !important; }
 
@@ -153,15 +153,16 @@
       <input id="desc" placeholder="Description">
       <input id="serial" placeholder="Serial">
 
-      <!-- DATE PICKER -->
-      <input type="date" id="cal">
+      <!-- ✅ NEW -->
+      <input id="resit" placeholder="Resit No.">
 
-      <!-- VALIDITY -->
+      <input type="date" id="cal">
       <input type="number" id="validity" placeholder="Validity (Years)" min="1" max="5">
 
       <input id="qty" placeholder="Quantity">
       <input id="price" placeholder="Price (RM)">
 
+      <!-- ✅ Purchase Date -->
       <input type="date" id="date">
     </div>
 
@@ -173,7 +174,7 @@
   <!-- TABLE -->
   <div class="card">
 
-    <!-- 🔥 FILTER BUTTONS -->
+    <!-- FILTER -->
     <div style="margin-bottom:10px;">
       <button onclick="setFilter('ALL')" class="btn-add">All</button>
       <button onclick="setFilter('EXPIRED')" class="btn-delete">Expired</button>
@@ -192,11 +193,12 @@
           <th>Tag</th>
           <th>Description</th>
           <th>Serial</th>
+          <th>Resit No.</th> <!-- ✅ NEW -->
           <th>Expiry Date</th>
           <th>Status</th>
           <th>Qty</th>
           <th>Price</th>
-          <th>Date</th>
+          <th>Purchase Date</th> <!-- ✅ UPDATED -->
           <th>Action</th>
         </tr>
       </thead>

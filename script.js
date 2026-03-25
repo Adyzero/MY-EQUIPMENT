@@ -1,20 +1,19 @@
 let table = document.getElementById("tableBody");
 let editId = null;
 
-// 🔥 FILTER + ALERT CONTROL
+// FILTER + ALERT
 let currentFilter = "ALL";
 let alertShown = false;
 
-// 🔧 Convert price safely
+// 🔧 PRICE
 function parsePrice(value) {
   if (!value) return 0;
   return parseFloat(value.toString().replace(/,/g, "")) || 0;
 }
 
-// 🔧 FORMAT DATE → DD/MM/YYYY
+// 🔧 DATE FORMAT
 function formatDate(dateStr) {
   if (!dateStr) return "";
-
   let d = new Date(dateStr);
 
   let day = d.getDate().toString().padStart(2, "0");
@@ -24,7 +23,7 @@ function formatDate(dateStr) {
   return `${day}/${month}/${year}`;
 }
 
-// 🔥 CALCULATE EXPIRY + STATUS
+// 🔥 EXPIRY LOGIC
 function getExpiryStatus(calDate, validity) {
 
   if (!calDate || !validity) {
@@ -56,19 +55,19 @@ function getExpiryStatus(calDate, validity) {
 
   return {
     expiry: formatDate(expiry),
-    label: label,
+    label,
     class: cssClass,
-    priority: priority
+    priority
   };
 }
 
-// 🔥 SET FILTER
+// 🔥 FILTER
 function setFilter(type) {
   currentFilter = type;
   loadData();
 }
 
-// 🔥 REAL-TIME LOAD + SORT + FILTER + ALERT
+// 🔥 LOAD DATA
 function loadData() {
 
   db.collection("equipment").onSnapshot(snapshot => {
@@ -88,7 +87,6 @@ function loadData() {
       item.expiry = result.expiry;
       item.status = result;
 
-      // 🔥 COUNT ALERT
       if (item.status.label === "EXPIRED") expiredCount++;
       if (item.status.label === "DUE SOON") dueSoonCount++;
 
@@ -98,25 +96,18 @@ function loadData() {
       data.push(item);
     });
 
-    // 🔥 SORT
+    // SORT
     data.sort((a, b) => a.status.priority - b.status.priority);
 
     let html = "";
 
     data.forEach((item, index) => {
 
-      // 🔥 FILTER
-      if (currentFilter !== "ALL" && item.status.label !== currentFilter) {
-        return;
-      }
+      if (currentFilter !== "ALL" && item.status.label !== currentFilter) return;
 
       let labelClass = "label-ok";
-
-      if (item.status.label === "EXPIRED") {
-        labelClass = "label-expired";
-      } else if (item.status.label === "DUE SOON") {
-        labelClass = "label-warning";
-      }
+      if (item.status.label === "EXPIRED") labelClass = "label-expired";
+      else if (item.status.label === "DUE SOON") labelClass = "label-warning";
 
       html += `
         <tr class="${item.status.class}">
@@ -124,6 +115,7 @@ function loadData() {
           <td>${item.tag || ""}</td>
           <td>${item.desc || ""}</td>
           <td>${item.serial || ""}</td>
+          <td>${item.resit || ""}</td> <!-- ✅ NEW -->
           <td>${item.expiry}</td>
           <td><span class="label ${labelClass}">${item.status.label}</span></td>
           <td>${item.qty || ""}</td>
@@ -139,12 +131,12 @@ function loadData() {
 
     table.innerHTML = html;
 
-    // 📊 DASHBOARD
+    // DASHBOARD
     document.getElementById("totalItems").innerText = data.length;
     document.getElementById("totalValue").innerText =
       total.toLocaleString(undefined, { minimumFractionDigits: 2 });
 
-    // 🔔 ALERT (ONLY ONCE)
+    // ALERT
     if (!alertShown && (expiredCount > 0 || dueSoonCount > 0)) {
 
       let message = "";
@@ -168,14 +160,15 @@ function loadData() {
 function addEquipment() {
 
   let newItem = {
-    tag: document.getElementById("tag").value.trim(),
-    desc: document.getElementById("desc").value.trim(),
-    serial: document.getElementById("serial").value.trim(),
-    cal: document.getElementById("cal").value,
-    validity: document.getElementById("validity").value,
-    qty: document.getElementById("qty").value.trim(),
-    price: document.getElementById("price").value.trim(),
-    date: document.getElementById("date").value
+    tag: tag.value.trim(),
+    desc: desc.value.trim(),
+    serial: serial.value.trim(),
+    resit: resit.value.trim(), // ✅ NEW
+    cal: cal.value,
+    validity: validity.value,
+    qty: qty.value.trim(),
+    price: price.value.trim(),
+    date: date.value
   };
 
   if (!newItem.tag || !newItem.desc) {
@@ -205,6 +198,7 @@ function editItem(id) {
     tag.value = item.tag || "";
     desc.value = item.desc || "";
     serial.value = item.serial || "";
+    resit.value = item.resit || ""; // ✅ NEW
     cal.value = item.cal || "";
     validity.value = item.validity || "";
     qty.value = item.qty || "";
@@ -224,8 +218,7 @@ function deleteItem(id) {
 
 // 🔍 SEARCH
 function searchTable() {
-
-  let input = document.getElementById("search").value.toLowerCase();
+  let input = search.value.toLowerCase();
   let rows = document.querySelectorAll("#tableBody tr");
 
   rows.forEach(row => {
@@ -236,7 +229,6 @@ function searchTable() {
 
 // 📥 EXPORT
 function exportToExcel() {
-
   let rows = document.querySelectorAll("table tr");
   let csv = [];
 
@@ -257,11 +249,12 @@ function exportToExcel() {
   a.click();
 }
 
-// 🧹 CLEAR FORM
+// 🧹 CLEAR
 function clearForm() {
   tag.value = "";
   desc.value = "";
   serial.value = "";
+  resit.value = ""; // ✅ NEW
   cal.value = "";
   validity.value = "";
   qty.value = "";
