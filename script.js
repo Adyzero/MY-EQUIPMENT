@@ -48,10 +48,7 @@ function addSet() {
 
   if (!name) return alert("Enter set name");
 
-  db.collection("equipment_sets").add({
-    name,
-    serial
-  }).then(() => {
+  db.collection("equipment_sets").add({ name, serial }).then(() => {
     document.getElementById("setName").value = "";
     document.getElementById("setSerial").value = "";
   });
@@ -80,7 +77,7 @@ function loadSetDropdown() {
 }
 
 // ==========================
-// ➕ ADD ITEM (🔥 FIXED)
+// ➕ ADD ITEM
 // ==========================
 function addEquipment() {
 
@@ -100,7 +97,6 @@ function addEquipment() {
     certUrl: ""
   };
 
-  // 🔥 validation
   if (!item.tag || !item.desc) {
     alert("Please fill Tag & Description");
     return;
@@ -143,9 +139,7 @@ function uploadFiles(item, receiptFile, certFile, setId) {
       .doc(setId)
       .collection("items")
       .add(item)
-      .then(() => {
-        clearForm();
-      });
+      .then(() => clearForm());
 
   });
 }
@@ -171,20 +165,18 @@ function deleteSet(setId) {
 
     let batch = db.batch();
 
-    snapshot.forEach(doc => {
-      batch.delete(doc.ref);
-    });
+    snapshot.forEach(doc => batch.delete(doc.ref));
 
     batch.commit().then(() => {
       setRef.delete();
-      alert("Set deleted successfully");
+      alert("Set deleted");
     });
 
   });
 }
 
 // ==========================
-// 🔥 LOAD DATA
+// 🔥 LOAD DATA (REALTIME ITEMS)
 // ==========================
 function loadData() {
 
@@ -211,12 +203,13 @@ function loadData() {
         </tr>
       `;
 
+      // 🔥 REALTIME ITEMS (FIXED)
       db.collection("equipment_sets")
         .doc(setId)
         .collection("items")
-        .get()
-        .then(itemSnap => {
+        .onSnapshot(itemSnap => {
 
+          let html = "";
           let i = 1;
 
           itemSnap.forEach(doc => {
@@ -224,7 +217,7 @@ function loadData() {
             let item = doc.data();
             let status = getStatus(item.cal, item.validity);
 
-            table.innerHTML += `
+            html += `
               <tr class="set-${setId}">
                 <td>${i++}</td>
                 <td>${item.tag || ""}</td>
@@ -236,12 +229,17 @@ function loadData() {
                 <td>${item.price || ""}</td>
                 <td>${formatDate(item.date)}</td>
                 <td>
-                  <button class="btn-delete" onclick="deleteItem('${setId}','${doc.id}')">🗑</button>
+                  <button class="btn-delete"
+                    onclick="event.stopPropagation(); deleteItem('${setId}','${doc.id}')">
+                    🗑
+                  </button>
                 </td>
               </tr>
             `;
 
           });
+
+          table.innerHTML += html;
 
         });
 
@@ -251,19 +249,21 @@ function loadData() {
 }
 
 // ==========================
-// 🗑 DELETE ITEM
+// 🗑 DELETE ITEM (FIXED)
 // ==========================
 function deleteItem(setId, itemId) {
 
-  if (confirm("Delete item?")) {
+  console.log("Deleting:", setId, itemId);
 
-    db.collection("equipment_sets")
-      .doc(setId)
-      .collection("items")
-      .doc(itemId)
-      .delete();
+  if (!confirm("Delete item?")) return;
 
-  }
+  db.collection("equipment_sets")
+    .doc(setId)
+    .collection("items")
+    .doc(itemId)
+    .delete()
+    .then(() => console.log("Deleted OK"))
+    .catch(err => console.error(err));
 }
 
 // ==========================
@@ -281,7 +281,7 @@ function searchTable() {
 }
 
 // ==========================
-// 🧹 CLEAR FORM (🔥 FIXED)
+// 🧹 CLEAR FORM
 // ==========================
 function clearForm() {
   document.getElementById("tag").value = "";
