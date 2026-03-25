@@ -22,7 +22,7 @@ function formatDate(dateStr) {
   return `${day}/${month}/${year}`;
 }
 
-// 🔥 EXPIRY
+// 🔥 EXPIRY LOGIC
 function getExpiryStatus(calDate, validity) {
 
   if (!calDate || !validity) {
@@ -64,7 +64,7 @@ function setFilter(type) {
   loadData();
 }
 
-// 🔥 LOAD
+// 🔥 LOAD DATA
 function loadData() {
 
   db.collection("equipment").onSnapshot(snapshot => {
@@ -92,6 +92,7 @@ function loadData() {
       data.push(item);
     });
 
+    // 🔥 SORT BY STATUS
     data.sort((a, b) => a.status.priority - b.status.priority);
 
     let html = "";
@@ -104,6 +105,29 @@ function loadData() {
       if (item.status.label === "EXPIRED") labelClass = "label-expired";
       else if (item.status.label === "DUE SOON") labelClass = "label-warning";
 
+      // 🔥 RECEIPT DISPLAY (IMAGE / PDF)
+      let receiptHTML = "-";
+
+      if (item.receiptUrl) {
+        let url = item.receiptUrl.toLowerCase();
+
+        if (url.includes(".jpg") || url.includes(".jpeg") || url.includes(".png")) {
+          receiptHTML = `
+            <img src="${item.receiptUrl}" 
+                 style="width:60px;height:60px;object-fit:cover;border-radius:6px;cursor:pointer"
+                 onclick="window.open('${item.receiptUrl}')">
+          `;
+        } else if (url.includes(".pdf")) {
+          receiptHTML = `
+            <a href="${item.receiptUrl}" target="_blank">📄 View PDF</a>
+          `;
+        } else {
+          receiptHTML = `
+            <a href="${item.receiptUrl}" target="_blank">View File</a>
+          `;
+        }
+      }
+
       html += `
         <tr class="${item.status.class}">
           <td>${index + 1}</td>
@@ -112,17 +136,14 @@ function loadData() {
           <td>${item.serial || ""}</td>
           <td>${item.resit || ""}</td>
 
-          <td>
-            ${item.receiptUrl 
-              ? `<a href="${item.receiptUrl}" target="_blank">📄 View</a>` 
-              : "-"}
-          </td>
+          <td>${receiptHTML}</td>
 
           <td>${item.expiry}</td>
           <td><span class="label ${labelClass}">${item.status.label}</span></td>
           <td>${item.qty || ""}</td>
           <td>${item.price || ""}</td>
           <td>${formatDate(item.date)}</td>
+
           <td>
             <button class="btn-edit" onclick="editItem('${item.id}')">✏️</button>
             <button class="btn-delete" onclick="deleteItem('${item.id}')">🗑</button>
@@ -133,10 +154,12 @@ function loadData() {
 
     table.innerHTML = html;
 
+    // 📊 DASHBOARD
     document.getElementById("totalItems").innerText = data.length;
     document.getElementById("totalValue").innerText =
       total.toLocaleString(undefined, { minimumFractionDigits: 2 });
 
+    // 🔔 ALERT ONCE
     if (!alertShown && (expiredCount > 0 || dueSoonCount > 0)) {
 
       let message = "";
@@ -151,7 +174,7 @@ function loadData() {
   });
 }
 
-// 🔥 SAVE (FIXED)
+// 🔥 SAVE
 function saveData(newItem) {
 
   if (editId) {
@@ -166,7 +189,7 @@ function saveData(newItem) {
   }
 }
 
-// 🔥 ADD / UPDATE (FIXED RECEIPT)
+// 🔥 ADD / UPDATE
 function addEquipment() {
 
   let file = document.getElementById("receiptFile").files[0];
@@ -188,7 +211,6 @@ function addEquipment() {
     return;
   }
 
-  // 🔥 CASE 1: FILE SELECTED
   if (file) {
 
     let storageRef = storage.ref("receipts/" + Date.now() + "_" + file.name);
@@ -204,9 +226,7 @@ function addEquipment() {
 
     });
 
-  } 
-  // 🔥 CASE 2: NO FILE (KEEP OLD RECEIPT)
-  else {
+  } else {
 
     if (editId) {
 
