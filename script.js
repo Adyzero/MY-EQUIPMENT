@@ -347,13 +347,17 @@ function searchTable() {
   let keyword = document.getElementById("search").value.toLowerCase();
 
   if (!keyword) {
-    renderData(); // reset
+    renderData();
     return;
   }
 
   let filtered = [];
 
   allData.forEach(set => {
+
+    let matchSet =
+      (set.name && set.name.toLowerCase().includes(keyword)) ||
+      (set.serial && set.serial.toLowerCase().includes(keyword)); // 🔥 FIX HERE
 
     let filteredItems = set.items.filter(item => {
 
@@ -362,13 +366,17 @@ function searchTable() {
         (item.desc && item.desc.toLowerCase().includes(keyword)) ||
         (item.resit && item.resit.toLowerCase().includes(keyword)) ||
         (item.qty && item.qty.toLowerCase().includes(keyword)) ||
-        (item.price && item.price.toString().includes(keyword)) ||
-        (set.name && set.name.toLowerCase().includes(keyword)) // 🔥 BONUS
+        (item.price && item.price.toString().includes(keyword))
       );
 
     });
 
-    if (filteredItems.length > 0) {
+    // 🔥 IMPORTANT LOGIC
+    if (matchSet) {
+      // show FULL set if set matches
+      filtered.push(set);
+    } else if (filteredItems.length > 0) {
+      // show only matched items
       filtered.push({
         ...set,
         items: filteredItems
