@@ -355,7 +355,6 @@ function searchTable() {
 
   allData.forEach(set => {
 
-    // 🔥 SAFE CONVERT TO STRING
     let setName = (set.name || "").toLowerCase();
     let setSerial = String(set.serial || "").toLowerCase();
 
@@ -370,23 +369,30 @@ function searchTable() {
       let resit = (item.resit || "").toLowerCase();
       let qty = (item.qty || "").toLowerCase();
       let price = String(item.price || "");
+      let purchase = (item.date || "").toLowerCase();
+
+      // 🔥 STATUS CALCULATION
+      let statusObj = getStatus(item.cal, item.validity);
+      let statusText = (statusObj.label || "")
+        .replace("❌", "")
+        .replace("✅", "")
+        .toLowerCase();
 
       return (
         tag.includes(keyword) ||
         desc.includes(keyword) ||
         resit.includes(keyword) ||
         qty.includes(keyword) ||
-        price.includes(keyword)
+        price.includes(keyword) ||
+        purchase.includes(keyword) ||          // ✅ purchase date
+        statusText.includes(keyword)           // ✅ status (expired, ok, etc)
       );
 
     });
 
-    // 🔥 SHOW FULL SET IF SET MATCH
     if (matchSet) {
       filtered.push(set);
-    }
-    // 🔥 OR SHOW FILTERED ITEMS
-    else if (filteredItems.length > 0) {
+    } else if (filteredItems.length > 0) {
       filtered.push({
         ...set,
         items: filteredItems
