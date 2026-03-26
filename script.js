@@ -35,15 +35,24 @@ document.addEventListener("click", function(e) {
 });
 
 // ==========================
-// 🔥 FORMAT CURRENCY (NEW)
+// 🔥 FORMAT CURRENCY (FIXED)
 function formatCurrency(value) {
   if (!value) return "-";
 
-  let num = Number(value.toString().replace(/,/g, ""));
-  if (isNaN(num)) return value;
+  let clean = value.toString().replace(/[^\d]/g, "");
+  let num = Number(clean);
+
+  if (isNaN(num)) return "-";
 
   return "RM " + num.toLocaleString("en-MY");
 }
+
+// ==========================
+// 🔥 LIVE INPUT FORMAT (BONUS)
+document.getElementById("price").addEventListener("input", function(e) {
+  let value = e.target.value.replace(/[^\d]/g, "");
+  e.target.value = Number(value || 0).toLocaleString("en-MY");
+});
 
 // ==========================
 // FILE UPLOAD
@@ -127,7 +136,10 @@ async function addEquipment() {
     desc: document.getElementById("desc").value.trim(),
     resit: document.getElementById("resit").value.trim(),
     qty: document.getElementById("qty").value.trim(),
-    price: document.getElementById("price").value.trim(),
+
+    // 🔥 CLEAN PRICE BEFORE SAVE
+    price: document.getElementById("price").value.replace(/[^\d]/g, ""),
+
     cal: document.getElementById("cal").value,
     validity: document.getElementById("validity").value,
     date: document.getElementById("date").value,
@@ -178,7 +190,7 @@ function editItem(setId, itemId) {
   document.getElementById("desc").value = item.desc || "";
   document.getElementById("resit").value = item.resit || "";
   document.getElementById("qty").value = item.qty || "";
-  document.getElementById("price").value = item.price || "";
+  document.getElementById("price").value = formatCurrency(item.price).replace("RM ", "");
   document.getElementById("cal").value = item.cal || "";
   document.getElementById("validity").value = item.validity || "";
   document.getElementById("date").value = item.date || "";
