@@ -41,7 +41,7 @@ document.addEventListener("keydown", function (e) {
 });
 
 // ==========================
-// 🔥 GLOBAL CLICK HANDLER (MAIN FIX)
+// 🔥 GLOBAL CLICK HANDLER
 document.addEventListener("click", function(e) {
 
   // FILE VIEW
@@ -109,6 +109,7 @@ function getStatus(cal, validity) {
 }
 
 // ==========================
+// ADD SET
 function addSet() {
 
   let name = document.getElementById("setName").value.trim();
@@ -116,12 +117,7 @@ function addSet() {
 
   if (!name) return alert("Enter set name");
 
-  if (editingSet) {
-    db.collection("equipment_sets").doc(editingSet).update({ name, serial });
-    editingSet = null;
-  } else {
-    db.collection("equipment_sets").add({ name, serial });
-  }
+  db.collection("equipment_sets").add({ name, serial });
 
   document.getElementById("setName").value = "";
   document.getElementById("setSerial").value = "";
@@ -139,6 +135,7 @@ function loadSetDropdown() {
 }
 
 // ==========================
+// ADD ITEM
 async function addEquipment() {
 
   let setId = setSelect.value;
@@ -176,6 +173,28 @@ async function addEquipment() {
 }
 
 // ==========================
+// 🔥 EDIT ITEM (RESTORED)
+function editItem(setId, itemId) {
+
+  let set = allData.find(s => s.id === setId);
+  let item = set.items.find(i => i.id === itemId);
+
+  editingItem = { setId, id: itemId };
+
+  setSelect.value = setId;
+
+  document.getElementById("tag").value = item.tag || "";
+  document.getElementById("desc").value = item.desc || "";
+  document.getElementById("resit").value = item.resit || "";
+  document.getElementById("qty").value = item.qty || "";
+  document.getElementById("price").value = item.price || "";
+  document.getElementById("cal").value = item.cal || "";
+  document.getElementById("validity").value = item.validity || "";
+  document.getElementById("date").value = item.date || "";
+}
+
+// ==========================
+// RENDER
 function renderData(filtered = null) {
 
   let data = filtered || allData;
@@ -221,6 +240,7 @@ function renderData(filtered = null) {
         <td>${formatDate(item.date)}</td>
 
         <td>
+          <button onclick="editItem('${set.id}','${item.id}')">✏️</button>
           <button onclick="deleteItem('${set.id}','${item.id}')">🗑</button>
         </td>
       </tr>
