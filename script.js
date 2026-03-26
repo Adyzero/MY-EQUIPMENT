@@ -13,7 +13,7 @@ function formatDate(dateStr) {
 }
 
 // ==========================
-// 🔥 AUTO STATUS SYSTEM
+// 🔥 STATUS (NO EMOJI - CSS ICON USED)
 function getStatus(cal, validity) {
 
   if (!cal || !validity) {
@@ -34,7 +34,8 @@ function getStatus(cal, validity) {
     return {
       expiry: formatDate(expiry),
       label: "EXPIRED",
-      class: "label-expired"
+      class: "label-expired",
+      rowClass: "row-expired"
     };
   }
 
@@ -42,14 +43,16 @@ function getStatus(cal, validity) {
     return {
       expiry: formatDate(expiry),
       label: "DUE SOON",
-      class: "label-warning"
+      class: "label-warning",
+      rowClass: ""
     };
   }
 
   return {
     expiry: formatDate(expiry),
     label: "OK",
-    class: "label-ok"
+    class: "label-ok",
+    rowClass: ""
   };
 }
 
@@ -244,6 +247,7 @@ function renderData(filtered = null) {
       let s = getStatus(item.cal, item.validity);
 
       let row = document.createElement("tr");
+      if (s.rowClass) row.classList.add(s.rowClass); // 🔥 highlight row
 
       row.innerHTML = `
         <td>${i++}</td>
