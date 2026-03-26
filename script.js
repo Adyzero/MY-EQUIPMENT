@@ -8,7 +8,7 @@ let editingItem = null;
 let editingSet = null;
 
 // ==========================
-// 🔥 MODAL VIEWER (FIXED)
+// 🔥 MODAL VIEWER (FINAL FIX)
 function openModal(url) {
 
   if (!url) {
@@ -247,7 +247,7 @@ function deleteSet(setId) {
 }
 
 // ==========================
-// 🔥 RENDER (FIXED BUTTON)
+// 🔥 RENDER (FINAL FIXED)
 function renderData(filtered = null) {
 
   let data = filtered || allData;
@@ -287,10 +287,10 @@ function renderData(filtered = null) {
           ${item.resit || "-"}<br>
 
           ${item.receiptUrl ? 
-            `<button class="file-btn" onclick="openModal('${item.receiptUrl}')">📄 Receipt</button>` : ""}
+            `<button class="file-btn" onclick='openModal("${item.receiptUrl}")'>📄 Receipt</button>` : ""}
 
           ${item.certUrl ? 
-            `<br><button class="file-btn" onclick="openModal('${item.certUrl}')">📑 Cert</button>` : ""}
+            `<br><button class="file-btn" onclick='openModal("${item.certUrl}")'>📑 Cert</button>` : ""}
         </td>
 
         <td>${s.expiry}</td>

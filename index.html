@@ -71,7 +71,7 @@ input:focus {
   cursor: pointer;
 }
 
-/* ✅ NEW BUTTON FOR FILE */
+/* FILE BUTTON */
 .file-btn {
   border: none;
   border-radius: 6px;
@@ -126,16 +126,8 @@ td {
   font-weight: 700;
 }
 
-.status-ok {
-  background: #e6f7ee;
-  color: #1b8a4b;
-}
-
-.status-warning {
-  background: #fff4e5;
-  color: #cc7a00;
-}
-
+.status-ok { background: #e6f7ee; color: #1b8a4b; }
+.status-warning { background: #fff4e5; color: #cc7a00; }
 .status-expired {
   background: #ffe5e5;
   color: #d90429;
@@ -167,11 +159,11 @@ td {
 .btn-action.edit { background: #e3f2fd; }
 .btn-action.delete { background: #fdecea; }
 
-/* MODAL */
+/* 🔥 MODAL (FIXED) */
 .modal {
   display: none;
   position: fixed;
-  z-index: 999;
+  z-index: 9999; /* FIX */
   width: 100%;
   height: 100%;
   background: rgba(0,0,0,0.8);
@@ -184,6 +176,7 @@ td {
   display: block;
   border-radius: 10px;
   background: white;
+  pointer-events: auto; /* FIX */
 }
 
 .close {
