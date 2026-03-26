@@ -4,6 +4,10 @@ let setSelect = document.getElementById("setSelect");
 let listeners = {};
 let allData = [];
 
+// 🔥 EDIT STATE
+let editingItem = null;
+let editingSet = null;
+
 // ==========================
 function formatDate(dateStr) {
   if (!dateStr) return "-";
@@ -13,7 +17,6 @@ function formatDate(dateStr) {
 }
 
 // ==========================
-// 🔥 STATUS (NO EMOJI - CSS ICON USED)
 function getStatus(cal, validity) {
 
   if (!cal || !validity) {
@@ -23,50 +26,38 @@ function getStatus(cal, validity) {
   let expiry = new Date(cal);
   expiry.setFullYear(expiry.getFullYear() + Number(validity));
 
-  if (isNaN(expiry)) {
-    return { expiry: "-", label: "-", class: "" };
-  }
-
   let today = new Date();
   let diffDays = (expiry - today) / (1000 * 60 * 60 * 24);
 
   if (diffDays < 0) {
-    return {
-      expiry: formatDate(expiry),
-      label: "EXPIRED",
-      class: "label-expired",
-      rowClass: "row-expired"
-    };
+    return { expiry: formatDate(expiry), label: "EXPIRED", class: "label-expired", rowClass: "row-expired" };
   }
 
   if (diffDays <= 30) {
-    return {
-      expiry: formatDate(expiry),
-      label: "DUE SOON",
-      class: "label-warning",
-      rowClass: ""
-    };
+    return { expiry: formatDate(expiry), label: "DUE SOON", class: "label-warning" };
   }
 
-  return {
-    expiry: formatDate(expiry),
-    label: "OK",
-    class: "label-ok",
-    rowClass: ""
-  };
+  return { expiry: formatDate(expiry), label: "OK", class: "label-ok" };
 }
 
 // ==========================
+// 🔥 ADD / EDIT SET
 function addSet() {
+
   let name = document.getElementById("setName").value.trim();
   let serial = document.getElementById("setSerial").value.trim();
 
   if (!name) return alert("Enter set name");
 
-  db.collection("equipment_sets").add({ name, serial }).then(() => {
-    document.getElementById("setName").value = "";
-    document.getElementById("setSerial").value = "";
-  });
+  if (editingSet) {
+    db.collection("equipment_sets").doc(editingSet).update({ name, serial });
+    editingSet = null;
+  } else {
+    db.collection("equipment_sets").add({ name, serial });
+  }
+
+  document.getElementById("setName").value = "";
+  document.getElementById("setSerial").value = "";
 }
 
 // ==========================
@@ -77,7 +68,7 @@ function loadSetDropdown() {
       let s = doc.data();
       setSelect.innerHTML += `
         <option value="${doc.id}">
-          ${s.name || "-"} (${s.serial || "-"})
+          ${s.name} (${s.serial})
         </option>
       `;
     });
@@ -85,10 +76,10 @@ function loadSetDropdown() {
 }
 
 // ==========================
+// 🔥 ADD / EDIT ITEM
 function addEquipment() {
 
   let setId = setSelect.value;
-  if (!setId) return alert("Select equipment set");
 
   let item = {
     tag: document.getElementById("tag").value.trim(),
@@ -98,9 +89,7 @@ function addEquipment() {
     price: document.getElementById("price").value.trim(),
     cal: document.getElementById("cal").value,
     validity: document.getElementById("validity").value,
-    date: document.getElementById("date").value,
-    receiptUrl: "",
-    certUrl: ""
+    date: document.getElementById("date").value
   };
 
   if (!item.tag || !item.desc) {
@@ -108,43 +97,60 @@ function addEquipment() {
     return;
   }
 
-  let receiptFile = document.getElementById("receiptFile").files[0];
-  let certFile = document.getElementById("certFile").files[0];
+  // ✏️ EDIT MODE
+  if (editingItem) {
+    db.collection("equipment_sets")
+      .doc(editingItem.setId)
+      .collection("items")
+      .doc(editingItem.id)
+      .update(item);
 
-  uploadFiles(item, receiptFile, certFile, setId);
+    editingItem = null;
+    clearForm();
+    return;
+  }
+
+  // ➕ ADD MODE
+  db.collection("equipment_sets")
+    .doc(setId)
+    .collection("items")
+    .add(item);
+
+  clearForm();
 }
 
 // ==========================
-function uploadFiles(item, receiptFile, certFile, setId) {
+// ✏️ EDIT ITEM
+function editItem(setId, itemId) {
 
-  let tasks = [];
+  let set = allData.find(s => s.id === setId);
+  let item = set.items.find(i => i.id === itemId);
 
-  if (receiptFile) {
-    let ref = storage.ref("receipts/" + Date.now());
-    tasks.push(
-      ref.put(receiptFile)
-        .then(r => r.ref.getDownloadURL())
-        .then(url => item.receiptUrl = url)
-    );
-  }
+  editingItem = { setId, id: itemId };
 
-  if (certFile) {
-    let ref = storage.ref("certificates/" + Date.now());
-    tasks.push(
-      ref.put(certFile)
-        .then(r => r.ref.getDownloadURL())
-        .then(url => item.certUrl = url)
-    );
-  }
+  setSelect.value = setId;
 
-  Promise.all(tasks).then(() => {
-    db.collection("equipment_sets")
-      .doc(setId)
-      .collection("items")
-      .add(item);
+  document.getElementById("tag").value = item.tag || "";
+  document.getElementById("desc").value = item.desc || "";
+  document.getElementById("resit").value = item.resit || "";
+  document.getElementById("qty").value = item.qty || "";
+  document.getElementById("price").value = item.price || "";
+  document.getElementById("cal").value = item.cal || "";
+  document.getElementById("validity").value = item.validity || "";
+  document.getElementById("date").value = item.date || "";
 
-    clearForm();
-  });
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+// ==========================
+// ✏️ EDIT SET
+function editSet(id, name, serial) {
+  editingSet = id;
+
+  document.getElementById("setName").value = name;
+  document.getElementById("setSerial").value = serial;
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 // ==========================
@@ -233,7 +239,10 @@ function renderData(filtered = null) {
 
     groupRow.innerHTML = `
       <td colspan="10">
-        ▶ <b>${set.name || "-"} (${set.serial || "-"})</b>
+        ▶ <b>${set.name} (${set.serial})</b>
+
+        <button onclick="editSet('${set.id}','${set.name}','${set.serial}')">✏️</button>
+
         <button class="btn-delete" style="float:right"
           onclick="deleteSet('${set.id}')">🗑</button>
       </td>
@@ -247,19 +256,20 @@ function renderData(filtered = null) {
       let s = getStatus(item.cal, item.validity);
 
       let row = document.createElement("tr");
-      if (s.rowClass) row.classList.add(s.rowClass); // 🔥 highlight row
+      if (s.rowClass) row.classList.add(s.rowClass);
 
       row.innerHTML = `
         <td>${i++}</td>
-        <td>${item.tag || "-"}</td>
-        <td>${item.desc || "-"}</td>
-        <td>${item.resit || "-"}</td>
+        <td>${item.tag}</td>
+        <td>${item.desc}</td>
+        <td>${item.resit}</td>
         <td>${s.expiry}</td>
         <td><span class="label ${s.class}">${s.label}</span></td>
-        <td>${item.qty || "-"}</td>
-        <td>${item.price || "-"}</td>
+        <td>${item.qty}</td>
+        <td>${item.price}</td>
         <td>${formatDate(item.date)}</td>
         <td>
+          <button onclick="editItem('${set.id}','${item.id}')">✏️</button>
           <button class="btn-delete"
             onclick="deleteItem('${set.id}','${item.id}')">🗑</button>
         </td>
@@ -324,8 +334,6 @@ function clearForm() {
   document.getElementById("cal").value = "";
   document.getElementById("validity").value = "";
   document.getElementById("date").value = "";
-  document.getElementById("receiptFile").value = "";
-  document.getElementById("certFile").value = "";
 }
 
 // ==========================
