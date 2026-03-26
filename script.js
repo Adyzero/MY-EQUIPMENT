@@ -373,10 +373,7 @@ function searchTable() {
 
       // 🔥 STATUS CALCULATION
       let statusObj = getStatus(item.cal, item.validity);
-      let statusText = (statusObj.label || "")
-        .replace("❌", "")
-        .replace("✅", "")
-        .toLowerCase();
+      let statusText = (statusObj.label || "").toLowerCase();
 
       return (
         tag.includes(keyword) ||
