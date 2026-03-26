@@ -16,6 +16,7 @@ function formatDate(dateStr) {
 }
 
 // ==========================
+// 🔥 IMPROVED STATUS
 function getStatus(cal, validity) {
 
   if (!cal || !validity) {
@@ -29,14 +30,27 @@ function getStatus(cal, validity) {
   let diffDays = (expiry - today) / (1000 * 60 * 60 * 24);
 
   if (diffDays < 0) {
-    return { expiry: formatDate(expiry), label: "EXPIRED", class: "label-expired", rowClass: "row-expired" };
+    return {
+      expiry: formatDate(expiry),
+      label: "❌ EXPIRED",
+      class: "status-expired",
+      rowClass: "row-expired"
+    };
   }
 
   if (diffDays <= 30) {
-    return { expiry: formatDate(expiry), label: "DUE SOON", class: "label-warning" };
+    return {
+      expiry: formatDate(expiry),
+      label: "⚠️ DUE SOON",
+      class: "status-warning"
+    };
   }
 
-  return { expiry: formatDate(expiry), label: "OK", class: "label-ok" };
+  return {
+    expiry: formatDate(expiry),
+    label: "✅ OK",
+    class: "status-ok"
+  };
 }
 
 // ==========================
@@ -220,7 +234,7 @@ function loadData() {
 }
 
 // ==========================
-// RENDER (🔥 FIXED ACTION COLUMN)
+// RENDER
 function renderData(filtered = null) {
 
   let data = filtered || allData;
@@ -231,7 +245,6 @@ function renderData(filtered = null) {
 
     if (set.items.length === 0) return;
 
-    // 🔥 GROUP ROW (FIXED)
     let groupRow = document.createElement("tr");
     groupRow.className = "group-row";
 

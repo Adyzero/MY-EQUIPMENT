@@ -48,10 +48,6 @@ h1 {
   flex-direction: column;
 }
 
-.form-group.full {
-  grid-column: span 2;
-}
-
 label {
   font-size: 12px;
   margin-bottom: 5px;
@@ -71,7 +67,7 @@ input:focus, select:focus {
 
 /* BUTTON */
 .btn-add {
-  background: #28a745;
+  background: linear-gradient(135deg, #28a745, #1e7e34);
   color: white;
   border-radius: 10px;
   padding: 10px 16px;
@@ -89,6 +85,7 @@ input:focus, select:focus {
   width: 100%;
   padding: 12px;
   border-radius: 30px;
+  border: 1px solid #ccc;
 }
 
 /* TABLE */
@@ -115,34 +112,56 @@ td {
   font-weight: bold;
 }
 
-/* STATUS */
+/* ========================= */
+/* 🔥 STATUS IMPROVED */
+/* ========================= */
+
 .label {
-  padding: 5px 10px;
+  padding: 6px 12px;
   border-radius: 20px;
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-block;
 }
 
-.label-ok {
+/* ✅ OK */
+.status-ok {
   background: #e6f7ee;
-  color: #1e7e34;
+  color: #1b8a4b;
+  border: 1px solid #b7e4c7;
 }
 
-.label-warning {
-  background: #fff4e0;
-  color: #b8860b;
+/* ⚠️ DUE SOON */
+.status-warning {
+  background: #fff4e5;
+  color: #cc7a00;
+  border: 1px solid #ffd8a8;
 }
 
-.label-expired {
-  background: #fdecea;
-  color: #b02a37;
+/* ❌ EXPIRED */
+.status-expired {
+  background: #ffe5e5;
+  color: #d90429;
+  border: 1px solid #ffb3b3;
   animation: blink 1s infinite;
 }
 
+/* BLINK */
 @keyframes blink {
-  50% { opacity: 0.5; }
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
 }
 
-/* 🔥 ACTION BUTTON */
+/* EXPIRED ROW */
+.row-expired {
+  background-color: #fff5f5;
+}
+
+/* ========================= */
+/* ACTION BUTTON */
+/* ========================= */
+
 .action-group {
   display: flex;
   justify-content: center;
@@ -151,10 +170,10 @@ td {
 
 .btn-action {
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 6px 10px;
   cursor: pointer;
-  transition: 0.2s;
+  transition: 0.25s ease;
 }
 
 /* EDIT */
@@ -166,6 +185,7 @@ td {
 .btn-action.edit:hover {
   background: #1976d2;
   color: white;
+  transform: scale(1.1);
 }
 
 /* DELETE */
@@ -177,6 +197,7 @@ td {
 .btn-action.delete:hover {
   background: #d32f2f;
   color: white;
+  transform: scale(1.1);
 }
 
 </style>
@@ -235,7 +256,7 @@ td {
 <!-- SEARCH -->
 <div class="card">
   <div class="search-wrapper">
-    <input id="search" onkeyup="searchTable()" placeholder="🔍 Search...">
+    <input id="search" onkeyup="searchTable()" placeholder="🔍 Search equipment, tag, serial...">
   </div>
 </div>
 
