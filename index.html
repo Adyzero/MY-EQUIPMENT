@@ -142,28 +142,11 @@ td {
   background: #fff5f5;
 }
 
-/* ACTION */
-.action-group {
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-}
-
-.btn-action {
-  border: none;
-  border-radius: 8px;
-  padding: 6px 8px;
-  cursor: pointer;
-}
-
-.btn-action.edit { background: #e3f2fd; }
-.btn-action.delete { background: #fdecea; }
-
-/* 🔥 MODAL (FIXED) */
+/* MODAL */
 .modal {
   display: none;
   position: fixed;
-  z-index: 9999; /* FIX */
+  z-index: 9999;
   width: 100%;
   height: 100%;
   background: rgba(0,0,0,0.8);
@@ -176,7 +159,6 @@ td {
   display: block;
   border-radius: 10px;
   background: white;
-  pointer-events: auto; /* FIX */
 }
 
 .close {

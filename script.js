@@ -8,9 +8,8 @@ let editingItem = null;
 let editingSet = null;
 
 // ==========================
-// 🔥 MODAL VIEWER (FINAL FIX)
+// MODAL
 function openModal(url) {
-
   if (!url) {
     alert("No file found");
     return;
@@ -18,25 +17,18 @@ function openModal(url) {
 
   console.log("Opening:", url);
 
-  const modal = document.getElementById("fileModal");
-  const frame = document.getElementById("fileFrame");
-
-  modal.style.display = "block";
-  frame.src = url;
+  document.getElementById("fileModal").style.display = "block";
+  document.getElementById("fileFrame").src = url;
 }
 
 function closeModal() {
-  const modal = document.getElementById("fileModal");
-  const frame = document.getElementById("fileFrame");
-
-  modal.style.display = "none";
-  frame.src = "";
+  document.getElementById("fileModal").style.display = "none";
+  document.getElementById("fileFrame").src = "";
 }
 
 // CLICK OUTSIDE CLOSE
 window.onclick = function (event) {
-  const modal = document.getElementById("fileModal");
-  if (event.target === modal) {
+  if (event.target.id === "fileModal") {
     closeModal();
   }
 };
@@ -46,6 +38,19 @@ document.addEventListener("keydown", function (e) {
   if (e.key === "Escape") {
     closeModal();
   }
+});
+
+// ==========================
+// 🔥 GLOBAL CLICK HANDLER (MAIN FIX)
+document.addEventListener("click", function(e) {
+
+  // FILE VIEW
+  if (e.target.classList.contains("view-file")) {
+    let url = e.target.getAttribute("data-url");
+    console.log("Clicked file:", url);
+    openModal(url);
+  }
+
 });
 
 // ==========================
@@ -67,7 +72,6 @@ function formatDate(dateStr) {
 }
 
 // ==========================
-// STATUS
 function getStatus(cal, validity) {
 
   if (!cal || !validity) {
@@ -105,7 +109,6 @@ function getStatus(cal, validity) {
 }
 
 // ==========================
-// ADD / EDIT SET
 function addSet() {
 
   let name = document.getElementById("setName").value.trim();
@@ -130,17 +133,12 @@ function loadSetDropdown() {
     setSelect.innerHTML = "";
     snap.forEach(doc => {
       let s = doc.data();
-      setSelect.innerHTML += `
-        <option value="${doc.id}">
-          ${s.name} (${s.serial})
-        </option>
-      `;
+      setSelect.innerHTML += `<option value="${doc.id}">${s.name} (${s.serial})</option>`;
     });
   });
 }
 
 // ==========================
-// ADD / EDIT ITEM
 async function addEquipment() {
 
   let setId = setSelect.value;
@@ -148,15 +146,8 @@ async function addEquipment() {
   let receiptFile = document.getElementById("receiptFile").files[0];
   let certFile = document.getElementById("certFile").files[0];
 
-  let receiptUrl = await uploadFile(
-    receiptFile,
-    `receipt/${Date.now()}_${receiptFile?.name || ""}`
-  );
-
-  let certUrl = await uploadFile(
-    certFile,
-    `cert/${Date.now()}_${certFile?.name || ""}`
-  );
+  let receiptUrl = await uploadFile(receiptFile, `receipt/${Date.now()}`);
+  let certUrl = await uploadFile(certFile, `cert/${Date.now()}`);
 
   let item = {
     tag: document.getElementById("tag").value.trim(),
@@ -176,78 +167,15 @@ async function addEquipment() {
     return;
   }
 
-  if (editingItem) {
-    await db.collection("equipment_sets")
-      .doc(editingItem.setId)
-      .collection("items")
-      .doc(editingItem.id)
-      .update(item);
-
-    editingItem = null;
-  } else {
-    await db.collection("equipment_sets")
-      .doc(setId)
-      .collection("items")
-      .add(item);
-  }
+  await db.collection("equipment_sets")
+    .doc(setId)
+    .collection("items")
+    .add(item);
 
   clearForm();
 }
 
 // ==========================
-// EDIT ITEM
-function editItem(setId, itemId) {
-
-  let set = allData.find(s => s.id === setId);
-  let item = set.items.find(i => i.id === itemId);
-
-  editingItem = { setId, id: itemId };
-
-  setSelect.value = setId;
-
-  document.getElementById("tag").value = item.tag || "";
-  document.getElementById("desc").value = item.desc || "";
-  document.getElementById("resit").value = item.resit || "";
-  document.getElementById("qty").value = item.qty || "";
-  document.getElementById("price").value = item.price || "";
-  document.getElementById("cal").value = item.cal || "";
-  document.getElementById("validity").value = item.validity || "";
-  document.getElementById("date").value = item.date || "";
-}
-
-// ==========================
-function editSet(id, name, serial) {
-  editingSet = id;
-  document.getElementById("setName").value = name;
-  document.getElementById("setSerial").value = serial;
-}
-
-// ==========================
-function deleteItem(setId, itemId) {
-  if (!confirm("Delete item?")) return;
-
-  db.collection("equipment_sets")
-    .doc(setId)
-    .collection("items")
-    .doc(itemId)
-    .delete();
-}
-
-// ==========================
-function deleteSet(setId) {
-  if (!confirm("Delete set + all items?")) return;
-
-  let ref = db.collection("equipment_sets").doc(setId);
-
-  ref.collection("items").get().then(snap => {
-    let batch = db.batch();
-    snap.forEach(doc => batch.delete(doc.ref));
-    batch.commit().then(() => ref.delete());
-  });
-}
-
-// ==========================
-// 🔥 RENDER (FINAL FIXED)
 function renderData(filtered = null) {
 
   let data = filtered || allData;
@@ -257,29 +185,22 @@ function renderData(filtered = null) {
 
     if (set.items.length === 0) return;
 
-    let groupRow = document.createElement("tr");
-    groupRow.className = "group-row";
-
-    groupRow.innerHTML = `
-      <td colspan="9">▶ <b>${set.name} (${set.serial})</b></td>
-      <td>
-        <button onclick="editSet('${set.id}','${set.name}','${set.serial}')">✏️</button>
-        <button onclick="deleteSet('${set.id}')">🗑</button>
-      </td>
+    table.innerHTML += `
+      <tr class="group-row">
+        <td colspan="9">▶ <b>${set.name} (${set.serial})</b></td>
+        <td>
+          <button onclick="deleteSet('${set.id}')">🗑</button>
+        </td>
+      </tr>
     `;
-    table.appendChild(groupRow);
 
-    let i = 1;
-
-    set.items.forEach(item => {
+    set.items.forEach((item, i) => {
 
       let s = getStatus(item.cal, item.validity);
 
-      let row = document.createElement("tr");
-      if (s.rowClass) row.classList.add(s.rowClass);
-
-      row.innerHTML = `
-        <td>${i++}</td>
+      table.innerHTML += `
+      <tr>
+        <td>${i+1}</td>
         <td>${item.tag}</td>
         <td>${item.desc}</td>
 
@@ -287,10 +208,10 @@ function renderData(filtered = null) {
           ${item.resit || "-"}<br>
 
           ${item.receiptUrl ? 
-            `<button class="file-btn" onclick='openModal("${item.receiptUrl}")'>📄 Receipt</button>` : ""}
+            `<button class="file-btn view-file" data-url="${item.receiptUrl}">📄 Receipt</button>` : ""}
 
           ${item.certUrl ? 
-            `<br><button class="file-btn" onclick='openModal("${item.certUrl}")'>📑 Cert</button>` : ""}
+            `<br><button class="file-btn view-file" data-url="${item.certUrl}">📑 Cert</button>` : ""}
         </td>
 
         <td>${s.expiry}</td>
@@ -300,12 +221,10 @@ function renderData(filtered = null) {
         <td>${formatDate(item.date)}</td>
 
         <td>
-          <button onclick="editItem('${set.id}','${item.id}')">✏️</button>
           <button onclick="deleteItem('${set.id}','${item.id}')">🗑</button>
         </td>
+      </tr>
       `;
-
-      table.appendChild(row);
     });
 
   });
@@ -316,26 +235,19 @@ function loadData() {
 
   db.collection("equipment_sets").onSnapshot(setSnap => {
 
-    table.innerHTML = "";
     allData = [];
-
-    Object.values(listeners).forEach(unsub => unsub());
-    listeners = {};
 
     setSnap.forEach(setDoc => {
 
-      let set = setDoc.data();
-      let setId = setDoc.id;
-
       let setObj = {
-        id: setId,
-        name: set.name,
-        serial: set.serial,
+        id: setDoc.id,
+        name: setDoc.data().name,
+        serial: setDoc.data().serial,
         items: []
       };
 
-      let unsubscribe = db.collection("equipment_sets")
-        .doc(setId)
+      db.collection("equipment_sets")
+        .doc(setDoc.id)
         .collection("items")
         .onSnapshot(itemSnap => {
 
@@ -347,41 +259,24 @@ function loadData() {
           renderData();
         });
 
-      listeners[setId] = unsubscribe;
       allData.push(setObj);
-
     });
 
   });
 }
 
 // ==========================
-function searchTable() {
+function deleteItem(setId, itemId) {
+  db.collection("equipment_sets")
+    .doc(setId)
+    .collection("items")
+    .doc(itemId)
+    .delete();
+}
 
-  let keyword = document.getElementById("search").value.toLowerCase();
-
-  if (!keyword) return renderData();
-
-  let filtered = [];
-
-  allData.forEach(set => {
-
-    let matchSet = (set.name + " " + set.serial).toLowerCase().includes(keyword);
-
-    let matchedItems = set.items.filter(item => {
-      return Object.values(item).join(" ").toLowerCase().includes(keyword);
-    });
-
-    if (matchSet || matchedItems.length > 0) {
-      filtered.push({
-        ...set,
-        items: matchSet ? set.items : matchedItems
-      });
-    }
-
-  });
-
-  renderData(filtered);
+// ==========================
+function deleteSet(setId) {
+  db.collection("equipment_sets").doc(setId).delete();
 }
 
 // ==========================
