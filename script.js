@@ -8,6 +8,18 @@ let editingItem = null;
 let editingSet = null;
 
 // ==========================
+// 🔥 MODAL VIEWER
+function openModal(url) {
+  document.getElementById("fileModal").style.display = "block";
+  document.getElementById("fileFrame").src = url;
+}
+
+function closeModal() {
+  document.getElementById("fileModal").style.display = "none";
+  document.getElementById("fileFrame").src = "";
+}
+
+// ==========================
 // FILE UPLOAD
 async function uploadFile(file, path) {
   if (!file) return "";
@@ -99,7 +111,7 @@ function loadSetDropdown() {
 }
 
 // ==========================
-// ADD / EDIT ITEM (WITH FILE)
+// ADD / EDIT ITEM
 async function addEquipment() {
 
   let setId = setSelect.value;
@@ -172,14 +184,11 @@ function editItem(setId, itemId) {
   document.getElementById("cal").value = item.cal || "";
   document.getElementById("validity").value = item.validity || "";
   document.getElementById("date").value = item.date || "";
-
-  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 // ==========================
 function editSet(id, name, serial) {
   editingSet = id;
-
   document.getElementById("setName").value = name;
   document.getElementById("setSerial").value = serial;
 }
@@ -254,7 +263,7 @@ function loadData() {
 }
 
 // ==========================
-// RENDER (UPDATED FOR FILE LINK)
+// RENDER (UPDATED MODAL LINK)
 function renderData(filtered = null) {
 
   let data = filtered || allData;
@@ -291,8 +300,12 @@ function renderData(filtered = null) {
         <td>${item.desc}</td>
         <td>
           ${item.resit || "-"}<br>
-          ${item.receiptUrl ? `<a href="${item.receiptUrl}" target="_blank">📄 Receipt</a>` : ""}
-          ${item.certUrl ? `<br><a href="${item.certUrl}" target="_blank">📑 Cert</a>` : ""}
+
+          ${item.receiptUrl ? 
+            `<a href="#" onclick="openModal('${item.receiptUrl}')">📄 Receipt</a>` : ""}
+
+          ${item.certUrl ? 
+            `<br><a href="#" onclick="openModal('${item.certUrl}')">📑 Cert</a>` : ""}
         </td>
         <td>${s.expiry}</td>
         <td><span class="label ${s.class}">${s.label}</span></td>

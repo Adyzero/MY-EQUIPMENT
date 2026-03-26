@@ -5,7 +5,6 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- FONT -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
@@ -24,7 +23,6 @@ body {
 h1 {
   text-align: center;
   color: #1f4e79;
-  margin-bottom: 25px;
 }
 
 /* CARD */
@@ -50,7 +48,6 @@ h1 {
 
 label {
   font-size: 12px;
-  margin-bottom: 5px;
   font-weight: 600;
 }
 
@@ -60,9 +57,8 @@ input, select {
   border: 1px solid #ccc;
 }
 
-input:focus, select:focus {
+input:focus {
   border-color: #1f4e79;
-  outline: none;
 }
 
 /* BUTTON */
@@ -112,94 +108,82 @@ td {
   font-weight: bold;
 }
 
-/* ========================= */
-/* 🔥 STATUS IMPROVED */
-/* ========================= */
-
+/* STATUS */
 .label {
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 12px;
   font-weight: 700;
-  display: inline-block;
 }
 
-/* ✅ OK */
 .status-ok {
   background: #e6f7ee;
   color: #1b8a4b;
-  border: 1px solid #b7e4c7;
 }
 
-/* ⚠️ DUE SOON */
 .status-warning {
   background: #fff4e5;
   color: #cc7a00;
-  border: 1px solid #ffd8a8;
 }
 
-/* ❌ EXPIRED */
 .status-expired {
   background: #ffe5e5;
   color: #d90429;
-  border: 1px solid #ffb3b3;
   animation: blink 1s infinite;
 }
 
-/* BLINK */
 @keyframes blink {
-  0% { opacity: 1; }
   50% { opacity: 0.4; }
-  100% { opacity: 1; }
 }
 
-/* EXPIRED ROW */
 .row-expired {
-  background-color: #fff5f5;
+  background: #fff5f5;
 }
 
-/* ========================= */
-/* ACTION BUTTON */
-/* ========================= */
-
+/* ACTION */
 .action-group {
   display: flex;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .btn-action {
   border: none;
-  border-radius: 10px;
-  padding: 6px 10px;
+  border-radius: 8px;
+  padding: 6px 8px;
   cursor: pointer;
-  transition: 0.25s ease;
 }
 
-/* EDIT */
-.btn-action.edit {
-  background: #e3f2fd;
-  color: #1976d2;
+.btn-action.edit { background: #e3f2fd; }
+.btn-action.delete { background: #fdecea; }
+
+/* MODAL */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 999;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.8);
 }
 
-.btn-action.edit:hover {
-  background: #1976d2;
+.modal iframe {
+  width: 90%;
+  height: 90%;
+  margin: 40px auto;
+  display: block;
+  border-radius: 10px;
+  background: white;
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 25px;
   color: white;
-  transform: scale(1.1);
+  font-size: 35px;
+  cursor: pointer;
 }
-
-/* DELETE */
-.btn-action.delete {
-  background: #fdecea;
-  color: #d32f2f;
-}
-
-.btn-action.delete:hover {
-  background: #d32f2f;
-  color: white;
-  transform: scale(1.1);
-}
-
 </style>
 </head>
 
@@ -247,6 +231,17 @@ td {
     <div class="form-group"><label>Calibration</label><input type="date" id="cal"></div>
     <div class="form-group"><label>Validity</label><input type="number" id="validity"></div>
     <div class="form-group"><label>Purchase</label><input type="date" id="date"></div>
+
+    <!-- 🔥 FILE UPLOAD -->
+    <div class="form-group">
+      <label>Upload Receipt</label>
+      <input type="file" id="receiptFile">
+    </div>
+
+    <div class="form-group">
+      <label>Upload Certificate</label>
+      <input type="file" id="certFile">
+    </div>
   </div>
 
   <br>
@@ -256,7 +251,7 @@ td {
 <!-- SEARCH -->
 <div class="card">
   <div class="search-wrapper">
-    <input id="search" onkeyup="searchTable()" placeholder="🔍 Search equipment, tag, serial...">
+    <input id="search" onkeyup="searchTable()" placeholder="🔍 Search equipment...">
   </div>
 </div>
 
@@ -284,19 +279,28 @@ td {
 
 </div>
 
+<!-- MODAL -->
+<div id="fileModal" class="modal">
+  <span class="close" onclick="closeModal()">&times;</span>
+  <iframe id="fileFrame"></iframe>
+</div>
+
 <!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
 <script>
 const firebaseConfig = {
   apiKey: "YOUR KEY",
   authDomain: "my-equipment-a340b.firebaseapp.com",
-  projectId: "my-equipment-a340b"
+  projectId: "my-equipment-a340b",
+  storageBucket: "my-equipment-a340b.firebasestorage.app"
 };
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const storage = firebase.storage();
 </script>
 
 <script src="script.js"></script>
