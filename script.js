@@ -5,17 +5,11 @@ let listeners = {};
 let allData = [];
 
 let editingItem = null;
-let editingSet = null;
 
 // ==========================
 // MODAL
 function openModal(url) {
-  if (!url) {
-    alert("No file found");
-    return;
-  }
-
-  console.log("Opening:", url);
+  if (!url) return alert("No file found");
 
   document.getElementById("fileModal").style.display = "block";
   document.getElementById("fileFrame").src = url;
@@ -26,38 +20,26 @@ function closeModal() {
   document.getElementById("fileFrame").src = "";
 }
 
-// CLICK OUTSIDE CLOSE
 window.onclick = function (event) {
-  if (event.target.id === "fileModal") {
-    closeModal();
-  }
+  if (event.target.id === "fileModal") closeModal();
 };
 
-// ESC CLOSE
-document.addEventListener("keydown", function (e) {
-  if (e.key === "Escape") {
-    closeModal();
-  }
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") closeModal();
 });
 
 // ==========================
-// 🔥 GLOBAL CLICK HANDLER
+// 🔥 CLICK HANDLER (FILE)
 document.addEventListener("click", function(e) {
-
-  // FILE VIEW
   if (e.target.classList.contains("view-file")) {
-    let url = e.target.getAttribute("data-url");
-    console.log("Clicked file:", url);
-    openModal(url);
+    openModal(e.target.getAttribute("data-url"));
   }
-
 });
 
 // ==========================
 // FILE UPLOAD
 async function uploadFile(file, path) {
   if (!file) return "";
-
   const ref = storage.ref().child(path);
   await ref.put(file);
   return await ref.getDownloadURL();
@@ -74,44 +56,22 @@ function formatDate(dateStr) {
 // ==========================
 function getStatus(cal, validity) {
 
-  if (!cal || !validity) {
-    return { expiry: "-", label: "-", class: "" };
-  }
+  if (!cal || !validity) return { expiry: "-", label: "-", class: "" };
 
   let expiry = new Date(cal);
   expiry.setFullYear(expiry.getFullYear() + Number(validity));
 
-  let today = new Date();
-  let diffDays = (expiry - today) / (1000 * 60 * 60 * 24);
+  let diff = (expiry - new Date()) / (1000*60*60*24);
 
-  if (diffDays < 0) {
-    return {
-      expiry: formatDate(expiry),
-      label: "❌ EXPIRED",
-      class: "status-expired",
-      rowClass: "row-expired"
-    };
-  }
+  if (diff < 0) return { expiry: formatDate(expiry), label: "❌ EXPIRED", class:"status-expired" };
+  if (diff <= 30) return { expiry: formatDate(expiry), label: "⚠️ DUE SOON", class:"status-warning" };
 
-  if (diffDays <= 30) {
-    return {
-      expiry: formatDate(expiry),
-      label: "⚠️ DUE SOON",
-      class: "status-warning"
-    };
-  }
-
-  return {
-    expiry: formatDate(expiry),
-    label: "✅ OK",
-    class: "status-ok"
-  };
+  return { expiry: formatDate(expiry), label: "✅ OK", class:"status-ok" };
 }
 
 // ==========================
 // ADD SET
 function addSet() {
-
   let name = document.getElementById("setName").value.trim();
   let serial = document.getElementById("setSerial").value.trim();
 
@@ -135,7 +95,7 @@ function loadSetDropdown() {
 }
 
 // ==========================
-// ADD ITEM
+// 🔥 ADD / UPDATE ITEM
 async function addEquipment() {
 
   let setId = setSelect.value;
@@ -146,6 +106,13 @@ async function addEquipment() {
   let receiptUrl = await uploadFile(receiptFile, `receipt/${Date.now()}`);
   let certUrl = await uploadFile(certFile, `cert/${Date.now()}`);
 
+  let oldItem = null;
+
+  if (editingItem) {
+    let set = allData.find(s => s.id === editingItem.setId);
+    oldItem = set.items.find(i => i.id === editingItem.id);
+  }
+
   let item = {
     tag: document.getElementById("tag").value.trim(),
     desc: document.getElementById("desc").value.trim(),
@@ -155,8 +122,10 @@ async function addEquipment() {
     cal: document.getElementById("cal").value,
     validity: document.getElementById("validity").value,
     date: document.getElementById("date").value,
-    receiptUrl,
-    certUrl
+
+    // 🔥 keep old file if no new upload
+    receiptUrl: receiptUrl || (oldItem ? oldItem.receiptUrl : ""),
+    certUrl: certUrl || (oldItem ? oldItem.certUrl : "")
   };
 
   if (!item.tag || !item.desc) {
@@ -164,16 +133,30 @@ async function addEquipment() {
     return;
   }
 
-  await db.collection("equipment_sets")
-    .doc(setId)
-    .collection("items")
-    .add(item);
+  if (editingItem) {
+
+    await db.collection("equipment_sets")
+      .doc(editingItem.setId)
+      .collection("items")
+      .doc(editingItem.id)
+      .update(item);
+
+    editingItem = null;
+
+  } else {
+
+    await db.collection("equipment_sets")
+      .doc(setId)
+      .collection("items")
+      .add(item);
+
+  }
 
   clearForm();
 }
 
 // ==========================
-// 🔥 EDIT ITEM (RESTORED)
+// EDIT ITEM
 function editItem(setId, itemId) {
 
   let set = allData.find(s => s.id === setId);
@@ -207,9 +190,7 @@ function renderData(filtered = null) {
     table.innerHTML += `
       <tr class="group-row">
         <td colspan="9">▶ <b>${set.name} (${set.serial})</b></td>
-        <td>
-          <button onclick="deleteSet('${set.id}')">🗑</button>
-        </td>
+        <td><button onclick="deleteSet('${set.id}')">🗑</button></td>
       </tr>
     `;
 
@@ -225,12 +206,8 @@ function renderData(filtered = null) {
 
         <td>
           ${item.resit || "-"}<br>
-
-          ${item.receiptUrl ? 
-            `<button class="file-btn view-file" data-url="${item.receiptUrl}">📄 Receipt</button>` : ""}
-
-          ${item.certUrl ? 
-            `<br><button class="file-btn view-file" data-url="${item.certUrl}">📑 Cert</button>` : ""}
+          ${item.receiptUrl ? `<button class="file-btn view-file" data-url="${item.receiptUrl}">📄 Receipt</button>` : ""}
+          ${item.certUrl ? `<br><button class="file-btn view-file" data-url="${item.certUrl}">📑 Cert</button>` : ""}
         </td>
 
         <td>${s.expiry}</td>
@@ -294,7 +271,6 @@ function deleteItem(setId, itemId) {
     .delete();
 }
 
-// ==========================
 function deleteSet(setId) {
   db.collection("equipment_sets").doc(setId).delete();
 }
