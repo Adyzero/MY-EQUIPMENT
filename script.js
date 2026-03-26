@@ -7,7 +7,6 @@ let editingItem = null;
 // ==========================
 // MODAL
 function openModal(url) {
-
   let modal = document.getElementById("fileModal");
   let frame = document.getElementById("fileFrame");
 
@@ -32,7 +31,6 @@ window.onclick = function (event) {
 // ==========================
 // CLICK FILE
 document.addEventListener("click", function(e) {
-
   let btn = e.target.closest(".view-file");
 
   if (btn) {
@@ -86,7 +84,6 @@ function formatDate(dateStr) {
 
 // ==========================
 function getStatus(cal, validity) {
-
   if (!cal || !validity) return { expiry: "-", label: "-", class: "" };
 
   let expiry = new Date(cal);
@@ -101,7 +98,7 @@ function getStatus(cal, validity) {
 }
 
 // ==========================
-// ✅ ADD SET (FIXED)
+// ADD SET
 function addSet() {
   let name = document.getElementById("setName").value.trim();
   let serial = document.getElementById("setSerial").value.trim();
@@ -111,7 +108,7 @@ function addSet() {
   db.collection("equipment_sets").add({
     name,
     serial,
-    createdAt: Date.now() // 🔥 IMPORTANT
+    createdAt: Date.now()
   });
 
   document.getElementById("setName").value = "";
@@ -119,14 +116,12 @@ function addSet() {
 }
 
 // ==========================
-// ✅ DROPDOWN SORT FIX
+// LOAD DROPDOWN
 function loadSetDropdown() {
   db.collection("equipment_sets")
-    .orderBy("createdAt", "asc") // 🔥 KEY FIX
+    .orderBy("createdAt", "asc")
     .onSnapshot(snap => {
-
       setSelect.innerHTML = "";
-
       snap.forEach(doc => {
         let s = doc.data();
         setSelect.innerHTML += `<option value="${doc.id}">${s.name} (${s.serial})</option>`;
@@ -182,7 +177,6 @@ async function addEquipment() {
       .set(item, { merge: true });
 
     editingItem = null;
-
   } else {
     await db.collection("equipment_sets")
       .doc(setId)
@@ -191,27 +185,6 @@ async function addEquipment() {
   }
 
   clearForm();
-}
-
-// ==========================
-// EDIT ITEM
-function editItem(setId, itemId) {
-
-  let set = allData.find(s => s.id === setId);
-  let item = set.items.find(i => i.id === itemId);
-
-  editingItem = { setId: setId, id: itemId };
-
-  setSelect.value = setId;
-
-  document.getElementById("tag").value = item.tag || "";
-  document.getElementById("desc").value = item.desc || "";
-  document.getElementById("resit").value = item.resit || "";
-  document.getElementById("qty").value = item.qty || "";
-  document.getElementById("price").value = formatCurrency(item.price).replace("RM ", "");
-  document.getElementById("cal").value = item.cal || "";
-  document.getElementById("validity").value = item.validity || "";
-  document.getElementById("date").value = item.date || "";
 }
 
 // ==========================
@@ -270,11 +243,11 @@ function renderData(filtered = null) {
 }
 
 // ==========================
-// ✅ LOAD DATA SORT FIX
+// LOAD DATA
 function loadData() {
 
   db.collection("equipment_sets")
-    .orderBy("createdAt", "asc") // 🔥 MAIN FIX
+    .orderBy("createdAt", "asc")
     .onSnapshot(setSnap => {
 
       allData = [];
@@ -308,40 +281,7 @@ function loadData() {
 }
 
 // ==========================
-function deleteItem(setId, itemId) {
-  db.collection("equipment_sets")
-    .doc(setId)
-    .collection("items")
-    .doc(itemId)
-    .delete();
-}
-
-function deleteSet(setId) {
-  db.collection("equipment_sets").doc(setId).delete();
-}
-
-// ==========================
-function clearForm() {
-  document.getElementById("tag").value = "";
-  document.getElementById("desc").value = "";
-  document.getElementById("resit").value = "";
-  document.getElementById("qty").value = "";
-  document.getElementById("price").value = "";
-  document.getElementById("cal").value = "";
-  document.getElementById("validity").value = "";
-  document.getElementById("date").value = "";
-  document.getElementById("receiptFile").value = "";
-  document.getElementById("certFile").value = "";
-}
-
-// ==========================
-window.onload = function () {
-  loadSetDropdown();
-  loadData();
-};
-
-// ==========================
-// 🔍 SEARCH FUNCTION (FIXED)
+// SEARCH (FINAL)
 function searchTable() {
 
   let keyword = document.getElementById("search").value.toLowerCase().trim();
@@ -358,9 +298,7 @@ function searchTable() {
     let setName = (set.name || "").toLowerCase();
     let setSerial = String(set.serial || "").toLowerCase();
 
-    let matchSet =
-      setName.includes(keyword) ||
-      setSerial.includes(keyword);
+    let matchSet = setName.includes(keyword) || setSerial.includes(keyword);
 
     let filteredItems = set.items.filter(item => {
 
@@ -371,9 +309,10 @@ function searchTable() {
       let price = String(item.price || "");
       let purchase = (item.date || "").toLowerCase();
 
-      // 🔥 STATUS CALCULATION
       let statusObj = getStatus(item.cal, item.validity);
-      let statusText = (statusObj.label || "").toLowerCase();
+      let statusText = (statusObj.label || "")
+        .replace(/[^\w\s]/gi, "")
+        .toLowerCase();
 
       return (
         tag.includes(keyword) ||
@@ -381,8 +320,8 @@ function searchTable() {
         resit.includes(keyword) ||
         qty.includes(keyword) ||
         price.includes(keyword) ||
-        purchase.includes(keyword) ||          // ✅ purchase date
-        statusText.includes(keyword)           // ✅ status (expired, ok, etc)
+        purchase.includes(keyword) ||
+        statusText.includes(keyword)
       );
 
     });
@@ -390,13 +329,16 @@ function searchTable() {
     if (matchSet) {
       filtered.push(set);
     } else if (filteredItems.length > 0) {
-      filtered.push({
-        ...set,
-        items: filteredItems
-      });
+      filtered.push({ ...set, items: filteredItems });
     }
 
   });
 
   renderData(filtered);
 }
+
+// ==========================
+window.onload = function () {
+  loadSetDropdown();
+  loadData();
+};
