@@ -2,27 +2,55 @@ let table = document.getElementById("tableBody");
 let setSelect = document.getElementById("setSelect");
 
 let listeners = {};
-let allData = []; // 🔥 store for search
+let allData = [];
 
 // ==========================
 function formatDate(dateStr) {
   if (!dateStr) return "-";
   let d = new Date(dateStr);
+  if (isNaN(d)) return "-";
   return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;
 }
 
 // ==========================
+// 🔥 AUTO STATUS SYSTEM
 function getStatus(cal, validity) {
-  if (!cal || !validity) return { expiry: "-", label: "OK", class: "label-ok" };
+
+  if (!cal || !validity) {
+    return { expiry: "-", label: "-", class: "" };
+  }
 
   let expiry = new Date(cal);
-  expiry.setFullYear(expiry.getFullYear() + parseInt(validity));
+  expiry.setFullYear(expiry.getFullYear() + Number(validity));
 
-  let diff = (expiry - new Date()) / (1000*60*60*24);
+  if (isNaN(expiry)) {
+    return { expiry: "-", label: "-", class: "" };
+  }
 
-  if (diff < 0) return { expiry: formatDate(expiry), label: "EXPIRED", class: "label-expired" };
-  if (diff <= 30) return { expiry: formatDate(expiry), label: "DUE SOON", class: "label-warning" };
-  return { expiry: formatDate(expiry), label: "OK", class: "label-ok" };
+  let today = new Date();
+  let diffDays = (expiry - today) / (1000 * 60 * 60 * 24);
+
+  if (diffDays < 0) {
+    return {
+      expiry: formatDate(expiry),
+      label: "EXPIRED",
+      class: "label-expired"
+    };
+  }
+
+  if (diffDays <= 30) {
+    return {
+      expiry: formatDate(expiry),
+      label: "DUE SOON",
+      class: "label-warning"
+    };
+  }
+
+  return {
+    expiry: formatDate(expiry),
+    label: "OK",
+    class: "label-ok"
+  };
 }
 
 // ==========================
@@ -44,7 +72,11 @@ function loadSetDropdown() {
     setSelect.innerHTML = "";
     snap.forEach(doc => {
       let s = doc.data();
-      setSelect.innerHTML += `<option value="${doc.id}">${s.name} (${s.serial})</option>`;
+      setSelect.innerHTML += `
+        <option value="${doc.id}">
+          ${s.name || "-"} (${s.serial || "-"})
+        </option>
+      `;
     });
   });
 }
@@ -137,8 +169,7 @@ function deleteSet(setId) {
 }
 
 // ==========================
-// 🔥 LOAD DATA + STORE FOR SEARCH
-// ==========================
+// 🔥 LIVE DATA
 function loadData() {
 
   db.collection("equipment_sets").onSnapshot(setSnap => {
@@ -171,7 +202,7 @@ function loadData() {
             setObj.items.push({ id: doc.id, ...doc.data() });
           });
 
-          renderData(); // 🔥 LIVE UPDATE
+          renderData();
         });
 
       listeners[setId] = unsubscribe;
@@ -183,8 +214,7 @@ function loadData() {
 }
 
 // ==========================
-// 🔥 RENDER FUNCTION
-// ==========================
+// 🔥 RENDER
 function renderData(filtered = null) {
 
   let data = filtered || allData;
@@ -195,13 +225,12 @@ function renderData(filtered = null) {
 
     if (set.items.length === 0) return;
 
-    // GROUP HEADER
     let groupRow = document.createElement("tr");
     groupRow.className = "group-row";
 
     groupRow.innerHTML = `
       <td colspan="10">
-        ▶ <b>${set.name} (${set.serial})</b>
+        ▶ <b>${set.name || "-"} (${set.serial || "-"})</b>
         <button class="btn-delete" style="float:right"
           onclick="deleteSet('${set.id}')">🗑</button>
       </td>
@@ -218,11 +247,11 @@ function renderData(filtered = null) {
 
       row.innerHTML = `
         <td>${i++}</td>
-        <td>${item.tag}</td>
-        <td>${item.desc}</td>
+        <td>${item.tag || "-"}</td>
+        <td>${item.desc || "-"}</td>
         <td>${item.resit || "-"}</td>
         <td>${s.expiry}</td>
-        <td><span class="${s.class}">${s.label}</span></td>
+        <td><span class="label ${s.class}">${s.label}</span></td>
         <td>${item.qty || "-"}</td>
         <td>${item.price || "-"}</td>
         <td>${formatDate(item.date)}</td>
@@ -236,12 +265,10 @@ function renderData(filtered = null) {
     });
 
   });
-
 }
 
 // ==========================
-// 🔍 SEARCH (FINAL WORKING)
-// ==========================
+// 🔍 SEARCH
 function searchTable() {
 
   let keyword = document.getElementById("search").value.toLowerCase();
