@@ -344,7 +344,7 @@ window.onload = function () {
 // 🔍 SEARCH FUNCTION (FIXED)
 function searchTable() {
 
-  let keyword = document.getElementById("search").value.toLowerCase();
+  let keyword = document.getElementById("search").value.toLowerCase().trim();
 
   if (!keyword) {
     renderData();
@@ -355,28 +355,38 @@ function searchTable() {
 
   allData.forEach(set => {
 
+    // 🔥 SAFE CONVERT TO STRING
+    let setName = (set.name || "").toLowerCase();
+    let setSerial = String(set.serial || "").toLowerCase();
+
     let matchSet =
-      (set.name && set.name.toLowerCase().includes(keyword)) ||
-      (set.serial && set.serial.toLowerCase().includes(keyword)); // 🔥 FIX HERE
+      setName.includes(keyword) ||
+      setSerial.includes(keyword);
 
     let filteredItems = set.items.filter(item => {
 
+      let tag = (item.tag || "").toLowerCase();
+      let desc = (item.desc || "").toLowerCase();
+      let resit = (item.resit || "").toLowerCase();
+      let qty = (item.qty || "").toLowerCase();
+      let price = String(item.price || "");
+
       return (
-        (item.tag && item.tag.toLowerCase().includes(keyword)) ||
-        (item.desc && item.desc.toLowerCase().includes(keyword)) ||
-        (item.resit && item.resit.toLowerCase().includes(keyword)) ||
-        (item.qty && item.qty.toLowerCase().includes(keyword)) ||
-        (item.price && item.price.toString().includes(keyword))
+        tag.includes(keyword) ||
+        desc.includes(keyword) ||
+        resit.includes(keyword) ||
+        qty.includes(keyword) ||
+        price.includes(keyword)
       );
 
     });
 
-    // 🔥 IMPORTANT LOGIC
+    // 🔥 SHOW FULL SET IF SET MATCH
     if (matchSet) {
-      // show FULL set if set matches
       filtered.push(set);
-    } else if (filteredItems.length > 0) {
-      // show only matched items
+    }
+    // 🔥 OR SHOW FILTERED ITEMS
+    else if (filteredItems.length > 0) {
       filtered.push({
         ...set,
         items: filteredItems
@@ -386,4 +396,18 @@ function searchTable() {
   });
 
   renderData(filtered);
+}
+
+let searchTimeout;
+
+function searchTable() {
+  clearTimeout(searchTimeout);
+
+  searchTimeout = setTimeout(() => {
+    performSearch();
+  }, 200);
+}
+
+function performSearch() {
+  // paste main search logic here
 }
