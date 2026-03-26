@@ -8,6 +8,16 @@ let editingItem = null;
 let editingSet = null;
 
 // ==========================
+// FILE UPLOAD
+async function uploadFile(file, path) {
+  if (!file) return "";
+
+  const ref = storage.ref().child(path);
+  await ref.put(file);
+  return await ref.getDownloadURL();
+}
+
+// ==========================
 function formatDate(dateStr) {
   if (!dateStr) return "-";
   let d = new Date(dateStr);
@@ -16,7 +26,7 @@ function formatDate(dateStr) {
 }
 
 // ==========================
-// 🔥 IMPROVED STATUS
+// STATUS
 function getStatus(cal, validity) {
 
   if (!cal || !validity) {
@@ -89,10 +99,23 @@ function loadSetDropdown() {
 }
 
 // ==========================
-// ADD / EDIT ITEM
-function addEquipment() {
+// ADD / EDIT ITEM (WITH FILE)
+async function addEquipment() {
 
   let setId = setSelect.value;
+
+  let receiptFile = document.getElementById("receiptFile").files[0];
+  let certFile = document.getElementById("certFile").files[0];
+
+  let receiptUrl = await uploadFile(
+    receiptFile,
+    `receipt/${Date.now()}_${receiptFile?.name || ""}`
+  );
+
+  let certUrl = await uploadFile(
+    certFile,
+    `cert/${Date.now()}_${certFile?.name || ""}`
+  );
 
   let item = {
     tag: document.getElementById("tag").value.trim(),
@@ -102,7 +125,9 @@ function addEquipment() {
     price: document.getElementById("price").value.trim(),
     cal: document.getElementById("cal").value,
     validity: document.getElementById("validity").value,
-    date: document.getElementById("date").value
+    date: document.getElementById("date").value,
+    receiptUrl: receiptUrl,
+    certUrl: certUrl
   };
 
   if (!item.tag || !item.desc) {
@@ -111,21 +136,19 @@ function addEquipment() {
   }
 
   if (editingItem) {
-    db.collection("equipment_sets")
+    await db.collection("equipment_sets")
       .doc(editingItem.setId)
       .collection("items")
       .doc(editingItem.id)
       .update(item);
 
     editingItem = null;
-    clearForm();
-    return;
+  } else {
+    await db.collection("equipment_sets")
+      .doc(setId)
+      .collection("items")
+      .add(item);
   }
-
-  db.collection("equipment_sets")
-    .doc(setId)
-    .collection("items")
-    .add(item);
 
   clearForm();
 }
@@ -154,14 +177,11 @@ function editItem(setId, itemId) {
 }
 
 // ==========================
-// EDIT SET
 function editSet(id, name, serial) {
   editingSet = id;
 
   document.getElementById("setName").value = name;
   document.getElementById("setSerial").value = serial;
-
-  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 // ==========================
@@ -234,11 +254,10 @@ function loadData() {
 }
 
 // ==========================
-// RENDER
+// RENDER (UPDATED FOR FILE LINK)
 function renderData(filtered = null) {
 
   let data = filtered || allData;
-
   table.innerHTML = "";
 
   data.forEach(set => {
@@ -249,20 +268,12 @@ function renderData(filtered = null) {
     groupRow.className = "group-row";
 
     groupRow.innerHTML = `
-      <td colspan="9">
-        ▶ <b>${set.name} (${set.serial})</b>
-      </td>
+      <td colspan="9">▶ <b>${set.name} (${set.serial})</b></td>
       <td>
-        <div class="action-group">
-          <button class="btn-action edit"
-            onclick="editSet('${set.id}','${set.name}','${set.serial}')">✏️</button>
-
-          <button class="btn-action delete"
-            onclick="deleteSet('${set.id}')">🗑</button>
-        </div>
+        <button onclick="editSet('${set.id}','${set.name}','${set.serial}')">✏️</button>
+        <button onclick="deleteSet('${set.id}')">🗑</button>
       </td>
     `;
-
     table.appendChild(groupRow);
 
     let i = 1;
@@ -278,20 +289,19 @@ function renderData(filtered = null) {
         <td>${i++}</td>
         <td>${item.tag}</td>
         <td>${item.desc}</td>
-        <td>${item.resit}</td>
+        <td>
+          ${item.resit || "-"}<br>
+          ${item.receiptUrl ? `<a href="${item.receiptUrl}" target="_blank">📄 Receipt</a>` : ""}
+          ${item.certUrl ? `<br><a href="${item.certUrl}" target="_blank">📑 Cert</a>` : ""}
+        </td>
         <td>${s.expiry}</td>
         <td><span class="label ${s.class}">${s.label}</span></td>
         <td>${item.qty}</td>
         <td>${item.price}</td>
         <td>${formatDate(item.date)}</td>
         <td>
-          <div class="action-group">
-            <button class="btn-action edit"
-              onclick="editItem('${set.id}','${item.id}')">✏️</button>
-
-            <button class="btn-action delete"
-              onclick="deleteItem('${set.id}','${item.id}')">🗑</button>
-          </div>
+          <button onclick="editItem('${set.id}','${item.id}')">✏️</button>
+          <button onclick="deleteItem('${set.id}','${item.id}')">🗑</button>
         </td>
       `;
 
@@ -302,15 +312,11 @@ function renderData(filtered = null) {
 }
 
 // ==========================
-// SEARCH
 function searchTable() {
 
   let keyword = document.getElementById("search").value.toLowerCase();
 
-  if (!keyword) {
-    renderData();
-    return;
-  }
+  if (!keyword) return renderData();
 
   let filtered = [];
 
@@ -319,17 +325,7 @@ function searchTable() {
     let matchSet = (set.name + " " + set.serial).toLowerCase().includes(keyword);
 
     let matchedItems = set.items.filter(item => {
-      let text = (
-        item.tag + " " +
-        item.desc + " " +
-        item.resit + " " +
-        item.qty + " " +
-        item.price + " " +
-        item.cal + " " +
-        item.date
-      ).toLowerCase();
-
-      return text.includes(keyword);
+      return Object.values(item).join(" ").toLowerCase().includes(keyword);
     });
 
     if (matchSet || matchedItems.length > 0) {
@@ -354,6 +350,8 @@ function clearForm() {
   document.getElementById("cal").value = "";
   document.getElementById("validity").value = "";
   document.getElementById("date").value = "";
+  document.getElementById("receiptFile").value = "";
+  document.getElementById("certFile").value = "";
 }
 
 // ==========================
