@@ -8,163 +8,197 @@
   <!-- FONT -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #eef2f7, #dfe9f3);
-      margin: 0;
-    }
+ <style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #eef2f7, #dfe9f3);
+    margin: 0;
+  }
 
-    .container {
-      width: 92%;
-      margin: auto;
-      margin-top: 20px;
-    }
+  .container {
+    width: 92%;
+    margin: auto;
+    margin-top: 20px;
+  }
 
-    h1 {
-      text-align: center;
-      color: #1f4e79;
-      margin-bottom: 20px;
-      letter-spacing: 1px;
-    }
+  h1 {
+    text-align: center;
+    color: #1f4e79;
+    margin-bottom: 25px;
+    letter-spacing: 1px;
+  }
 
-    .card {
-      background: white;
-      padding: 20px;
-      border-radius: 14px;
-      margin-bottom: 20px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-    }
+  /* CARD */
+  .card {
+    background: white;
+    padding: 22px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    transition: 0.3s;
+  }
 
-    h3 {
-      color: #1f4e79;
-      margin-bottom: 10px;
-    }
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(0,0,0,0.12);
+  }
 
-    /* FORM */
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 15px;
-    }
+  h3 {
+    color: #1f4e79;
+    margin-bottom: 15px;
+  }
 
-    .form-group {
-      display: flex;
-      flex-direction: column;
-    }
+  /* FORM GRID */
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+  }
 
-    .form-group.full {
-      grid-column: span 2;
-    }
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
 
-    label {
-      font-size: 12px;
-      margin-bottom: 5px;
-      font-weight: 600;
-      color: #444;
-    }
+  .form-group.full {
+    grid-column: span 2;
+  }
 
-    input, select {
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 13px;
-    }
+  label {
+    font-size: 12px;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #555;
+  }
 
-    input:focus, select:focus {
-      border-color: #1f4e79;
-      outline: none;
-    }
+  /* INPUT */
+  input, select {
+    padding: 11px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 13px;
+    transition: 0.25s;
+  }
 
-    /* BUTTON */
-    button {
-      padding: 10px 16px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-    }
+  input:hover, select:hover {
+    border-color: #1f4e79;
+  }
 
-    .btn-add {
-      background: linear-gradient(135deg, #28a745, #218838);
-      color: white;
-    }
+  input:focus, select:focus {
+    border-color: #1f4e79;
+    box-shadow: 0 0 8px rgba(31,78,121,0.15);
+    outline: none;
+  }
 
-    .btn-delete {
-      background: #dc3545;
-      color: white;
-    }
+  /* BUTTON */
+  button {
+    padding: 11px 18px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.25s;
+  }
 
-    /* 🔍 SEARCH (FIXED NICE LOOK) */
-    .search-wrapper {
-      max-width: 500px;
-      margin: auto;
-    }
+  .btn-add {
+    background: linear-gradient(135deg, #28a745, #218838);
+    color: white;
+  }
 
-    #search {
-      width: 100%;
-      padding: 12px 18px;
-      border-radius: 30px;
-      border: 1px solid #ccc;
-      font-size: 14px;
-      transition: 0.3s;
-    }
+  .btn-add:hover {
+    transform: scale(1.05);
+  }
 
-    #search:focus {
-      border-color: #1f4e79;
-      box-shadow: 0 0 8px rgba(31,78,121,0.2);
-      outline: none;
-    }
+  .btn-delete {
+    background: #dc3545;
+    color: white;
+  }
 
-    /* TABLE */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
+  .btn-delete:hover {
+    background: #b02a37;
+  }
 
-    th {
-      background: #1f4e79;
-      color: white;
-      padding: 12px;
-    }
+  /* SEARCH */
+  .search-wrapper {
+    max-width: 450px;
+    margin: auto;
+  }
 
-    td {
-      padding: 10px;
-      border-bottom: 1px solid #eee;
-      text-align: center;
-    }
+  #search {
+    width: 100%;
+    padding: 12px 18px;
+    border-radius: 30px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    transition: 0.3s;
+  }
 
-    tr:hover {
-      background: #f8fbff;
-    }
+  #search:focus {
+    border-color: #1f4e79;
+    box-shadow: 0 0 10px rgba(31,78,121,0.2);
+  }
 
-    /* GROUP HEADER */
-    .group-row {
-      background: linear-gradient(135deg, #2c5d87, #3b7cb5);
-      color: white;
-      font-weight: bold;
-    }
+  /* TABLE */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
 
-    .group-row td {
-      text-align: left;
-      padding: 14px;
-      font-size: 14px;
-    }
+  th {
+    background: #1f4e79;
+    color: white;
+    padding: 13px;
+  }
 
-    /* STATUS */
-    .label {
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: bold;
-    }
+  td {
+    padding: 11px;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+  }
 
-    .label-expired { background: #dc3545; color: white; }
-    .label-warning { background: #ffc107; color: black; }
-    .label-ok { background: #28a745; color: white; }
+  /* NORMAL ROW HOVER */
+  tr:hover:not(.group-row) {
+    background: #f5f9ff;
+  }
 
-  </style>
+  /* GROUP HEADER (IMPORTANT FIX) */
+  .group-row {
+    background: linear-gradient(135deg, #2c5d87, #3b7cb5);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.25s;
+  }
+
+  .group-row td {
+    text-align: left;
+    padding: 14px;
+    font-size: 14px;
+  }
+
+  .group-row:hover {
+    background: linear-gradient(135deg, #244b6f, #346c9c);
+    transform: scale(1.01);
+  }
+
+  .group-row:hover td {
+    color: white;
+  }
+
+  /* STATUS */
+  .label {
+    padding: 5px 9px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: bold;
+  }
+
+  .label-expired { background: #dc3545; color: white; }
+  .label-warning { background: #ffc107; color: black; }
+  .label-ok { background: #28a745; color: white; }
+
+</style>
 </head>
 
 <body>
