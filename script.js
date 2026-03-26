@@ -35,7 +35,7 @@ document.addEventListener("click", function(e) {
 });
 
 // ==========================
-// 🔥 FORMAT CURRENCY (FIXED)
+// FORMAT CURRENCY
 function formatCurrency(value) {
   if (!value) return "-";
 
@@ -48,7 +48,7 @@ function formatCurrency(value) {
 }
 
 // ==========================
-// 🔥 LIVE INPUT FORMAT (BONUS)
+// LIVE INPUT FORMAT
 document.getElementById("price").addEventListener("input", function(e) {
   let value = e.target.value.replace(/[^\d]/g, "");
   e.target.value = Number(value || 0).toLocaleString("en-MY");
@@ -137,12 +137,14 @@ async function addEquipment() {
     resit: document.getElementById("resit").value.trim(),
     qty: document.getElementById("qty").value.trim(),
 
-    // 🔥 CLEAN PRICE BEFORE SAVE
     price: document.getElementById("price").value.replace(/[^\d]/g, ""),
 
     cal: document.getElementById("cal").value,
     validity: document.getElementById("validity").value,
     date: document.getElementById("date").value,
+
+    // 🔥 IMPORTANT (BONUS)
+    createdAt: editingItem ? oldItem?.createdAt || Date.now() : Date.now(),
 
     receiptUrl: receiptUrl || (oldItem ? oldItem.receiptUrl : ""),
     certUrl: certUrl || (oldItem ? oldItem.certUrl : "")
@@ -206,6 +208,9 @@ function renderData(filtered = null) {
   data.forEach(set => {
 
     if (set.items.length === 0) return;
+
+    // 🔥 SORT HERE (FINAL FIX)
+    set.items.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
 
     table.innerHTML += `
       <tr class="group-row">
