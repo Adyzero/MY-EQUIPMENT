@@ -339,3 +339,43 @@ window.onload = function () {
   loadSetDropdown();
   loadData();
 };
+
+// ==========================
+// 🔍 SEARCH FUNCTION (FIXED)
+function searchTable() {
+
+  let keyword = document.getElementById("search").value.toLowerCase();
+
+  if (!keyword) {
+    renderData(); // reset
+    return;
+  }
+
+  let filtered = [];
+
+  allData.forEach(set => {
+
+    let filteredItems = set.items.filter(item => {
+
+      return (
+        (item.tag && item.tag.toLowerCase().includes(keyword)) ||
+        (item.desc && item.desc.toLowerCase().includes(keyword)) ||
+        (item.resit && item.resit.toLowerCase().includes(keyword)) ||
+        (item.qty && item.qty.toLowerCase().includes(keyword)) ||
+        (item.price && item.price.toString().includes(keyword)) ||
+        (set.name && set.name.toLowerCase().includes(keyword)) // 🔥 BONUS
+      );
+
+    });
+
+    if (filteredItems.length > 0) {
+      filtered.push({
+        ...set,
+        items: filteredItems
+      });
+    }
+
+  });
+
+  renderData(filtered);
+}
