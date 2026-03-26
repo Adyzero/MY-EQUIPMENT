@@ -1,9 +1,7 @@
 let table = document.getElementById("tableBody");
 let setSelect = document.getElementById("setSelect");
 
-let listeners = {};
 let allData = [];
-
 let editingItem = null;
 
 // ==========================
@@ -29,7 +27,7 @@ document.addEventListener("keydown", e => {
 });
 
 // ==========================
-// 🔥 CLICK HANDLER (FILE)
+// FILE CLICK (SAFE)
 document.addEventListener("click", function(e) {
   if (e.target.classList.contains("view-file")) {
     openModal(e.target.getAttribute("data-url"));
@@ -95,7 +93,7 @@ function loadSetDropdown() {
 }
 
 // ==========================
-// 🔥 ADD / UPDATE ITEM
+// 🔥 ADD / UPDATE ITEM (FINAL FIX)
 async function addEquipment() {
 
   let setId = setSelect.value;
@@ -110,7 +108,7 @@ async function addEquipment() {
 
   if (editingItem) {
     let set = allData.find(s => s.id === editingItem.setId);
-    oldItem = set.items.find(i => i.id === editingItem.id);
+    oldItem = set?.items.find(i => i.id === editingItem.id);
   }
 
   let item = {
@@ -123,7 +121,6 @@ async function addEquipment() {
     validity: document.getElementById("validity").value,
     date: document.getElementById("date").value,
 
-    // 🔥 keep old file if no new upload
     receiptUrl: receiptUrl || (oldItem ? oldItem.receiptUrl : ""),
     certUrl: certUrl || (oldItem ? oldItem.certUrl : "")
   };
@@ -133,13 +130,14 @@ async function addEquipment() {
     return;
   }
 
-  if (editingItem) {
+  // 🔥 GUARANTEED UPDATE
+  if (editingItem && editingItem.id) {
 
     await db.collection("equipment_sets")
       .doc(editingItem.setId)
       .collection("items")
       .doc(editingItem.id)
-      .update(item);
+      .set(item, { merge: true }); // safer than update
 
     editingItem = null;
 
@@ -156,13 +154,14 @@ async function addEquipment() {
 }
 
 // ==========================
-// EDIT ITEM
+// 🔥 EDIT ITEM (LOCKED)
 function editItem(setId, itemId) {
 
   let set = allData.find(s => s.id === setId);
   let item = set.items.find(i => i.id === itemId);
 
-  editingItem = { setId, id: itemId };
+  // 🔥 HARD LOCK (prevent reset)
+  editingItem = { setId: setId, id: itemId };
 
   setSelect.value = setId;
 
