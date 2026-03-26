@@ -9,229 +9,175 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
-  body {
-    font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg, #eef3f9, #d9e6f2);
-    margin: 0;
-  }
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #eef3f9, #d9e6f2);
+  margin: 0;
+}
 
-  .container {
-    width: 92%;
-    margin: auto;
-    margin-top: 20px;
-  }
+.container {
+  width: 92%;
+  margin: auto;
+  margin-top: 20px;
+}
 
-  h1 {
-    text-align: center;
-    color: #1f4e79;
-    margin-bottom: 25px;
-    letter-spacing: 1px;
-  }
+h1 {
+  text-align: center;
+  color: #1f4e79;
+  margin-bottom: 25px;
+}
 
-  /* CARD */
-  .card {
-    background: white;
-    padding: 22px;
-    border-radius: 16px;
-    margin-bottom: 20px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-    transition: 0.3s;
-  }
+/* CARD */
+.card {
+  background: white;
+  padding: 22px;
+  border-radius: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
 
-  .card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 28px rgba(0,0,0,0.12);
-  }
+/* FORM */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
+}
 
-  h3 {
-    color: #1f4e79;
-    margin-bottom: 15px;
-  }
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
 
-  /* FORM */
-  .form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 15px;
-  }
+.form-group.full {
+  grid-column: span 2;
+}
 
-  .form-group {
-    display: flex;
-    flex-direction: column;
-  }
+label {
+  font-size: 12px;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
 
-  .form-group.full {
-    grid-column: span 2;
-  }
+input, select {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
 
-  label {
-    font-size: 12px;
-    margin-bottom: 5px;
-    font-weight: 600;
-    color: #555;
-  }
+input:focus, select:focus {
+  border-color: #1f4e79;
+  outline: none;
+}
 
-  input, select {
-    padding: 11px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    font-size: 13px;
-    transition: 0.25s;
-  }
+/* BUTTON */
+.btn-add {
+  background: #28a745;
+  color: white;
+  border-radius: 10px;
+  padding: 10px 16px;
+  border: none;
+  cursor: pointer;
+}
 
-  input:hover, select:hover {
-    border-color: #1f4e79;
-  }
+/* SEARCH */
+.search-wrapper {
+  max-width: 450px;
+  margin: auto;
+}
 
-  input:focus, select:focus {
-    border-color: #1f4e79;
-    box-shadow: 0 0 8px rgba(31,78,121,0.15);
-    outline: none;
-  }
+#search {
+  width: 100%;
+  padding: 12px;
+  border-radius: 30px;
+}
 
-  /* BUTTON */
-  button {
-    padding: 11px 18px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: 0.25s;
-  }
+/* TABLE */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
 
-  .btn-add {
-    background: linear-gradient(135deg, #28a745, #1e7e34);
-    color: white;
-  }
+th {
+  background: #1f4e79;
+  color: white;
+  padding: 12px;
+}
 
-  .btn-add:hover {
-    transform: scale(1.05);
-  }
+td {
+  padding: 10px;
+  text-align: center;
+}
 
-  .btn-delete {
-    background: #dc3545;
-    color: white;
-  }
+/* GROUP */
+.group-row {
+  background: linear-gradient(135deg, #2c5d87, #3b7cb5);
+  color: white;
+  font-weight: bold;
+}
 
-  .btn-delete:hover {
-    background: #b02a37;
-    transform: scale(1.05);
-  }
+/* STATUS */
+.label {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+}
 
-  /* SEARCH */
-  .search-wrapper {
-    max-width: 450px;
-    margin: auto;
-  }
+.label-ok {
+  background: #e6f7ee;
+  color: #1e7e34;
+}
 
-  #search {
-    width: 100%;
-    padding: 12px 18px;
-    border-radius: 30px;
-    border: 1px solid #ccc;
-    font-size: 14px;
-    transition: 0.3s;
-  }
+.label-warning {
+  background: #fff4e0;
+  color: #b8860b;
+}
 
-  #search:focus {
-    border-color: #1f4e79;
-    box-shadow: 0 0 10px rgba(31,78,121,0.2);
-  }
+.label-expired {
+  background: #fdecea;
+  color: #b02a37;
+  animation: blink 1s infinite;
+}
 
-  /* TABLE */
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-    border-radius: 12px;
-    overflow: hidden;
-  }
+@keyframes blink {
+  50% { opacity: 0.5; }
+}
 
-  th {
-    background: #1f4e79;
-    color: white;
-    padding: 13px;
-  }
+/* 🔥 ACTION BUTTON */
+.action-group {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
 
-  td {
-    padding: 11px;
-    border-bottom: 1px solid #eee;
-    text-align: center;
-  }
+.btn-action {
+  border: none;
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: 0.2s;
+}
 
-  tr:hover:not(.group-row) {
-    background: #f2f7fc;
-  }
+/* EDIT */
+.btn-action.edit {
+  background: #e3f2fd;
+  color: #1976d2;
+}
 
-  /* GROUP HEADER */
-  .group-row {
-    background: linear-gradient(135deg, #2c5d87, #3b7cb5);
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.25s;
-  }
+.btn-action.edit:hover {
+  background: #1976d2;
+  color: white;
+}
 
-  .group-row td {
-    text-align: left;
-    padding: 14px;
-    font-size: 14px;
-  }
+/* DELETE */
+.btn-action.delete {
+  background: #fdecea;
+  color: #d32f2f;
+}
 
-  .group-row:hover {
-    background: linear-gradient(135deg, #244b6f, #346c9c);
-    transform: scale(1.01);
-  }
-
-  /* 🔥 NEW STATUS STYLE */
-  .label {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-  }
-
-  .label::before {
-    font-size: 12px;
-  }
-
-  /* OK */
-  .label-ok {
-    background: #e6f7ee;
-    color: #1e7e34;
-  }
-  .label-ok::before {
-    content: "✔";
-  }
-
-  /* WARNING */
-  .label-warning {
-    background: #fff4e0;
-    color: #b8860b;
-  }
-  .label-warning::before {
-    content: "⚠";
-  }
-
-  /* EXPIRED */
-  .label-expired {
-    background: #fdecea;
-    color: #b02a37;
-    animation: pulse 1.2s infinite;
-  }
-  .label-expired::before {
-    content: "✖";
-  }
-
-  /* BLINK EFFECT */
-  @keyframes pulse {
-    0% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.08); opacity: 0.75; }
-    100% { transform: scale(1); opacity: 1; }
-  }
+.btn-action.delete:hover {
+  background: #d32f2f;
+  color: white;
+}
 
 </style>
 </head>
@@ -259,7 +205,7 @@
   </div>
 
   <br>
-  <button class="btn-add" onclick="addSet()">➕ Add Set</button>
+  <button class="btn-add" onclick="addSet()">➕ Save Set</button>
 </div>
 
 <!-- ADD ITEM -->
@@ -272,57 +218,14 @@
   <br><br>
 
   <div class="form-grid">
-
-    <div class="form-group">
-      <label>Tag</label>
-      <input id="tag">
-    </div>
-
-    <div class="form-group">
-      <label>Description</label>
-      <input id="desc">
-    </div>
-
-    <div class="form-group">
-      <label>Receipt No</label>
-      <input id="resit">
-    </div>
-
-    <div class="form-group">
-      <label>Quantity</label>
-      <input id="qty">
-    </div>
-
-    <div class="form-group">
-      <label>Price (RM)</label>
-      <input id="price">
-    </div>
-
-    <div class="form-group">
-      <label>Calibration Date</label>
-      <input type="date" id="cal">
-    </div>
-
-    <div class="form-group">
-      <label>Validity (Years)</label>
-      <input type="number" id="validity">
-    </div>
-
-    <div class="form-group">
-      <label>Purchase Date</label>
-      <input type="date" id="date">
-    </div>
-
-    <div class="form-group full">
-      <label>Upload Receipt</label>
-      <input type="file" id="receiptFile">
-    </div>
-
-    <div class="form-group full">
-      <label>Upload Certificate</label>
-      <input type="file" id="certFile">
-    </div>
-
+    <div class="form-group"><label>Tag</label><input id="tag"></div>
+    <div class="form-group"><label>Description</label><input id="desc"></div>
+    <div class="form-group"><label>Receipt No</label><input id="resit"></div>
+    <div class="form-group"><label>Quantity</label><input id="qty"></div>
+    <div class="form-group"><label>Price</label><input id="price"></div>
+    <div class="form-group"><label>Calibration</label><input type="date" id="cal"></div>
+    <div class="form-group"><label>Validity</label><input type="number" id="validity"></div>
+    <div class="form-group"><label>Purchase</label><input type="date" id="date"></div>
   </div>
 
   <br>
@@ -332,31 +235,29 @@
 <!-- SEARCH -->
 <div class="card">
   <div class="search-wrapper">
-    <input type="text" id="search"
-      placeholder="🔍 Search equipment, tag, serial..."
-      onkeyup="searchTable()">
+    <input id="search" onkeyup="searchTable()" placeholder="🔍 Search...">
   </div>
 </div>
 
 <!-- TABLE -->
 <div class="card">
 <table>
-  <thead>
-    <tr>
-      <th>No</th>
-      <th>Tag</th>
-      <th>Description</th>
-      <th>Receipt</th>
-      <th>Expiry</th>
-      <th>Status</th>
-      <th>Qty</th>
-      <th>Price</th>
-      <th>Purchase</th>
-      <th>Action</th>
-    </tr>
-  </thead>
+<thead>
+<tr>
+  <th>No</th>
+  <th>Tag</th>
+  <th>Description</th>
+  <th>Receipt</th>
+  <th>Expiry</th>
+  <th>Status</th>
+  <th>Qty</th>
+  <th>Price</th>
+  <th>Purchase</th>
+  <th>Action</th>
+</tr>
+</thead>
 
-  <tbody id="tableBody"></tbody>
+<tbody id="tableBody"></tbody>
 </table>
 </div>
 
@@ -365,19 +266,16 @@
 <!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
 <script>
 const firebaseConfig = {
-  apiKey: "PASTE-YOUR-REAL-KEY-HERE",
+  apiKey: "YOUR KEY",
   authDomain: "my-equipment-a340b.firebaseapp.com",
-  projectId: "my-equipment-a340b",
-  storageBucket: "my-equipment-a340b.firebasestorage.app"
+  projectId: "my-equipment-a340b"
 };
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const storage = firebase.storage();
 </script>
 
 <script src="script.js"></script>

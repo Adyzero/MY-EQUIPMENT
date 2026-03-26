@@ -4,7 +4,6 @@ let setSelect = document.getElementById("setSelect");
 let listeners = {};
 let allData = [];
 
-// 🔥 EDIT STATE
 let editingItem = null;
 let editingSet = null;
 
@@ -41,7 +40,7 @@ function getStatus(cal, validity) {
 }
 
 // ==========================
-// 🔥 ADD / EDIT SET
+// ADD / EDIT SET
 function addSet() {
 
   let name = document.getElementById("setName").value.trim();
@@ -76,7 +75,7 @@ function loadSetDropdown() {
 }
 
 // ==========================
-// 🔥 ADD / EDIT ITEM
+// ADD / EDIT ITEM
 function addEquipment() {
 
   let setId = setSelect.value;
@@ -97,7 +96,6 @@ function addEquipment() {
     return;
   }
 
-  // ✏️ EDIT MODE
   if (editingItem) {
     db.collection("equipment_sets")
       .doc(editingItem.setId)
@@ -110,7 +108,6 @@ function addEquipment() {
     return;
   }
 
-  // ➕ ADD MODE
   db.collection("equipment_sets")
     .doc(setId)
     .collection("items")
@@ -120,7 +117,7 @@ function addEquipment() {
 }
 
 // ==========================
-// ✏️ EDIT ITEM
+// EDIT ITEM
 function editItem(setId, itemId) {
 
   let set = allData.find(s => s.id === setId);
@@ -143,7 +140,7 @@ function editItem(setId, itemId) {
 }
 
 // ==========================
-// ✏️ EDIT SET
+// EDIT SET
 function editSet(id, name, serial) {
   editingSet = id;
 
@@ -178,7 +175,7 @@ function deleteSet(setId) {
 }
 
 // ==========================
-// 🔥 LIVE DATA
+// LIVE DATA
 function loadData() {
 
   db.collection("equipment_sets").onSnapshot(setSnap => {
@@ -223,7 +220,7 @@ function loadData() {
 }
 
 // ==========================
-// 🔥 RENDER
+// RENDER (🔥 FIXED ACTION COLUMN)
 function renderData(filtered = null) {
 
   let data = filtered || allData;
@@ -234,19 +231,25 @@ function renderData(filtered = null) {
 
     if (set.items.length === 0) return;
 
+    // 🔥 GROUP ROW (FIXED)
     let groupRow = document.createElement("tr");
     groupRow.className = "group-row";
 
     groupRow.innerHTML = `
-      <td colspan="10">
+      <td colspan="9">
         ▶ <b>${set.name} (${set.serial})</b>
+      </td>
+      <td>
+        <div class="action-group">
+          <button class="btn-action edit"
+            onclick="editSet('${set.id}','${set.name}','${set.serial}')">✏️</button>
 
-        <button onclick="editSet('${set.id}','${set.name}','${set.serial}')">✏️</button>
-
-        <button class="btn-delete" style="float:right"
-          onclick="deleteSet('${set.id}')">🗑</button>
+          <button class="btn-action delete"
+            onclick="deleteSet('${set.id}')">🗑</button>
+        </div>
       </td>
     `;
+
     table.appendChild(groupRow);
 
     let i = 1;
@@ -269,9 +272,13 @@ function renderData(filtered = null) {
         <td>${item.price}</td>
         <td>${formatDate(item.date)}</td>
         <td>
-          <button onclick="editItem('${set.id}','${item.id}')">✏️</button>
-          <button class="btn-delete"
-            onclick="deleteItem('${set.id}','${item.id}')">🗑</button>
+          <div class="action-group">
+            <button class="btn-action edit"
+              onclick="editItem('${set.id}','${item.id}')">✏️</button>
+
+            <button class="btn-action delete"
+              onclick="deleteItem('${set.id}','${item.id}')">🗑</button>
+          </div>
         </td>
       `;
 
@@ -282,7 +289,7 @@ function renderData(filtered = null) {
 }
 
 // ==========================
-// 🔍 SEARCH
+// SEARCH
 function searchTable() {
 
   let keyword = document.getElementById("search").value.toLowerCase();
