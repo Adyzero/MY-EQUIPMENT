@@ -27,10 +27,23 @@ document.addEventListener("keydown", e => {
 });
 
 // ==========================
-// FILE CLICK
+// 🔥 FIXED CLICK HANDLER
 document.addEventListener("click", function(e) {
-  if (e.target.classList.contains("view-file")) {
-    openModal(e.target.getAttribute("data-url"));
+
+  let btn = e.target.closest(".view-file");
+
+  if (btn) {
+
+    let url = btn.getAttribute("data-url");
+
+    console.log("CLICK URL:", url);
+
+    if (!url || !url.startsWith("http")) {
+      alert("File not found or not uploaded properly");
+      return;
+    }
+
+    openModal(url);
   }
 });
 
@@ -143,7 +156,6 @@ async function addEquipment() {
     validity: document.getElementById("validity").value,
     date: document.getElementById("date").value,
 
-    // 🔥 IMPORTANT (BONUS)
     createdAt: editingItem ? oldItem?.createdAt || Date.now() : Date.now(),
 
     receiptUrl: receiptUrl || (oldItem ? oldItem.receiptUrl : ""),
@@ -209,7 +221,7 @@ function renderData(filtered = null) {
 
     if (set.items.length === 0) return;
 
-    // 🔥 SORT HERE (FINAL FIX)
+    // SORT FIX
     set.items.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
 
     table.innerHTML += `
@@ -231,8 +243,10 @@ function renderData(filtered = null) {
 
         <td>
           ${item.resit || "-"}<br>
-          ${item.receiptUrl ? `<button class="file-btn view-file" data-url="${item.receiptUrl}">📄 Receipt</button>` : ""}
-          ${item.certUrl ? `<br><button class="file-btn view-file" data-url="${item.certUrl}">📑 Cert</button>` : ""}
+          ${item.receiptUrl && item.receiptUrl.startsWith("http") ? 
+            `<button class="file-btn view-file" data-url="${item.receiptUrl}">📄 Receipt</button>` : ""}
+          ${item.certUrl && item.certUrl.startsWith("http") ? 
+            `<br><button class="file-btn view-file" data-url="${item.certUrl}">📑 Cert</button>` : ""}
         </td>
 
         <td>${s.expiry}</td>
