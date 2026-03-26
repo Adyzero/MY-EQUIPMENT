@@ -36,18 +36,19 @@ document.addEventListener("keydown", e => {
 });
 
 // ==========================
-// CLICK FILE (OPEN NEW TAB)
+// 🔥 FIXED CLICK HANDLER
 document.addEventListener("click", function(e) {
 
   let btn = e.target.closest(".view-file");
 
   if (btn) {
+
     let url = btn.getAttribute("data-url");
 
     console.log("CLICK URL:", url);
 
     if (!url || !url.startsWith("http")) {
-      alert("File not found");
+      alert("File not found or not uploaded properly");
       return;
     }
 
@@ -109,37 +110,28 @@ function getStatus(cal, validity) {
 }
 
 // ==========================
-// ADD SET (🔥 FIXED)
+// ADD SET
 function addSet() {
   let name = document.getElementById("setName").value.trim();
   let serial = document.getElementById("setSerial").value.trim();
 
   if (!name) return alert("Enter set name");
 
-  db.collection("equipment_sets").add({
-    name,
-    serial,
-    createdAt: Date.now() // 🔥 IMPORTANT
-  });
+  db.collection("equipment_sets").add({ name, serial });
 
   document.getElementById("setName").value = "";
   document.getElementById("setSerial").value = "";
 }
 
 // ==========================
-// LOAD SET DROPDOWN (SORTED)
 function loadSetDropdown() {
-  db.collection("equipment_sets")
-    .orderBy("createdAt", "asc") // 🔥 FIX
-    .onSnapshot(snap => {
-
-      setSelect.innerHTML = "";
-
-      snap.forEach(doc => {
-        let s = doc.data();
-        setSelect.innerHTML += `<option value="${doc.id}">${s.name} (${s.serial})</option>`;
-      });
+  db.collection("equipment_sets").onSnapshot(snap => {
+    setSelect.innerHTML = "";
+    snap.forEach(doc => {
+      let s = doc.data();
+      setSelect.innerHTML += `<option value="${doc.id}">${s.name} (${s.serial})</option>`;
     });
+  });
 }
 
 // ==========================
@@ -166,11 +158,15 @@ async function addEquipment() {
     desc: document.getElementById("desc").value.trim(),
     resit: document.getElementById("resit").value.trim(),
     qty: document.getElementById("qty").value.trim(),
+
     price: document.getElementById("price").value.replace(/[^\d]/g, ""),
+
     cal: document.getElementById("cal").value,
     validity: document.getElementById("validity").value,
     date: document.getElementById("date").value,
+
     createdAt: editingItem ? oldItem?.createdAt || Date.now() : Date.now(),
+
     receiptUrl: receiptUrl || (oldItem ? oldItem.receiptUrl : ""),
     certUrl: certUrl || (oldItem ? oldItem.certUrl : "")
   };
@@ -196,6 +192,7 @@ async function addEquipment() {
       .doc(setId)
       .collection("items")
       .add(item);
+
   }
 
   clearForm();
@@ -233,6 +230,7 @@ function renderData(filtered = null) {
 
     if (set.items.length === 0) return;
 
+    // SORT FIX
     set.items.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
 
     table.innerHTML += `
@@ -278,41 +276,38 @@ function renderData(filtered = null) {
 }
 
 // ==========================
-// LOAD DATA (🔥 FIXED ORDER)
 function loadData() {
 
-  db.collection("equipment_sets")
-    .orderBy("createdAt", "asc") // 🔥 BEST PRACTICE
-    .onSnapshot(setSnap => {
+  db.collection("equipment_sets").onSnapshot(setSnap => {
 
-      allData = [];
+    allData = [];
 
-      setSnap.forEach(setDoc => {
+    setSnap.forEach(setDoc => {
 
-        let setObj = {
-          id: setDoc.id,
-          name: setDoc.data().name,
-          serial: setDoc.data().serial,
-          items: []
-        };
+      let setObj = {
+        id: setDoc.id,
+        name: setDoc.data().name,
+        serial: setDoc.data().serial,
+        items: []
+      };
 
-        db.collection("equipment_sets")
-          .doc(setDoc.id)
-          .collection("items")
-          .onSnapshot(itemSnap => {
+      db.collection("equipment_sets")
+        .doc(setDoc.id)
+        .collection("items")
+        .onSnapshot(itemSnap => {
 
-            setObj.items = [];
-            itemSnap.forEach(doc => {
-              setObj.items.push({ id: doc.id, ...doc.data() });
-            });
-
-            renderData();
+          setObj.items = [];
+          itemSnap.forEach(doc => {
+            setObj.items.push({ id: doc.id, ...doc.data() });
           });
 
-        allData.push(setObj);
-      });
+          renderData();
+        });
 
+      allData.push(setObj);
     });
+
+  });
 }
 
 // ==========================
