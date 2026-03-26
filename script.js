@@ -152,59 +152,64 @@ function loadData() {
 
   db.collection("equipment_sets").onSnapshot(setSnap => {
 
-    let html = "";
+    table.innerHTML = ""; // ✅ clear table first
 
     setSnap.forEach(setDoc => {
 
       let set = setDoc.data();
       let setId = setDoc.id;
 
-      html += `
-        <tr class="group-row">
-          <td colspan="10">
-            ▶ <b>${set.name} (${set.serial})</b>
-            <button class="btn-delete" style="float:right"
-              onclick="event.stopPropagation(); deleteSet('${setId}')">
-              🗑
-            </button>
-          </td>
-        </tr>
+      // 🔵 GROUP HEADER
+      let groupRow = document.createElement("tr");
+      groupRow.className = "group-row";
+
+      groupRow.innerHTML = `
+        <td colspan="10">
+          ▶ <b>${set.name} (${set.serial})</b>
+          <button class="btn-delete" style="float:right"
+            onclick="event.stopPropagation(); deleteSet('${setId}')">
+            🗑
+          </button>
+        </td>
       `;
 
+      table.appendChild(groupRow);
+
+      // 🔥 LOAD ITEMS FOR THIS SET ONLY
       db.collection("equipment_sets")
         .doc(setId)
         .collection("items")
         .onSnapshot(itemSnap => {
 
-          let itemHTML = "";
           let i = 1;
 
           itemSnap.forEach(doc => {
+
             let item = doc.data();
             let s = getStatus(item.cal, item.validity);
 
-            itemHTML += `
-              <tr>
-                <td>${i++}</td>
-                <td>${item.tag}</td>
-                <td>${item.desc}</td>
-                <td>${item.resit}</td>
-                <td>${s.expiry}</td>
-                <td><span class="${s.class}">${s.label}</span></td>
-                <td>${item.qty}</td>
-                <td>${item.price}</td>
-                <td>${formatDate(item.date)}</td>
-                <td>
-                  <button class="btn-delete"
-                    onclick="event.stopPropagation(); deleteItem('${setId}','${doc.id}')">
-                    🗑
-                  </button>
-                </td>
-              </tr>
-            `;
-          });
+            let row = document.createElement("tr");
 
-          table.innerHTML = html + itemHTML;
+            row.innerHTML = `
+              <td>${i++}</td>
+              <td>${item.tag}</td>
+              <td>${item.desc}</td>
+              <td>${item.resit}</td>
+              <td>${s.expiry}</td>
+              <td><span class="${s.class}">${s.label}</span></td>
+              <td>${item.qty}</td>
+              <td>${item.price}</td>
+              <td>${formatDate(item.date)}</td>
+              <td>
+                <button class="btn-delete"
+                  onclick="event.stopPropagation(); deleteItem('${setId}','${doc.id}')">
+                  🗑
+                </button>
+              </td>
+            `;
+
+            table.appendChild(row);
+          });
 
         });
 
