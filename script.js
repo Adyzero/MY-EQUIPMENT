@@ -1,6 +1,8 @@
 let table = document.getElementById("tableBody");
 let setSelect = document.getElementById("setSelect");
 
+let listeners = {}; // 🔥 prevent duplicate listeners
+
 // ==========================
 // FORMAT DATE
 // ==========================
@@ -11,7 +13,7 @@ function formatDate(dateStr) {
 }
 
 // ==========================
-// EXPIRY
+// EXPIRY STATUS
 // ==========================
 function getStatus(cal, validity) {
   if (!cal || !validity) return { expiry: "-", label: "OK", class: "label-ok" };
@@ -30,8 +32,8 @@ function getStatus(cal, validity) {
 // ADD SET
 // ==========================
 function addSet() {
-  let name = document.getElementById("setName").value;
-  let serial = document.getElementById("setSerial").value;
+  let name = document.getElementById("setName").value.trim();
+  let serial = document.getElementById("setSerial").value.trim();
 
   if (!name) return alert("Enter set name");
 
@@ -59,11 +61,8 @@ function loadSetDropdown() {
 // ==========================
 function addEquipment() {
 
-  let setId = document.getElementById("setSelect").value;
-  if (!setId) {
-    alert("Select equipment set");
-    return;
-  }
+  let setId = setSelect.value;
+  if (!setId) return alert("Select equipment set");
 
   let item = {
     tag: document.getElementById("tag").value.trim(),
@@ -78,7 +77,6 @@ function addEquipment() {
     certUrl: ""
   };
 
-  // ✅ validation
   if (!item.tag || !item.desc) {
     alert("Please fill Tag & Description");
     return;
@@ -99,57 +97,63 @@ function uploadFiles(item, receiptFile, certFile, setId) {
 
   if (receiptFile) {
     let ref = storage.ref("receipts/" + Date.now());
-    tasks.push(ref.put(receiptFile).then(r=>r.ref.getDownloadURL()).then(u=>item.receiptUrl=u));
+    tasks.push(
+      ref.put(receiptFile)
+        .then(r => r.ref.getDownloadURL())
+        .then(url => item.receiptUrl = url)
+    );
   }
 
   if (certFile) {
     let ref = storage.ref("certificates/" + Date.now());
-    tasks.push(ref.put(certFile).then(r=>r.ref.getDownloadURL()).then(u=>item.certUrl=u));
+    tasks.push(
+      ref.put(certFile)
+        .then(r => r.ref.getDownloadURL())
+        .then(url => item.certUrl = url)
+    );
   }
 
-  Promise.all(tasks).then(()=>{
-    db.collection("equipment_sets").doc(setId).collection("items").add(item);
+  Promise.all(tasks).then(() => {
+    db.collection("equipment_sets")
+      .doc(setId)
+      .collection("items")
+      .add(item);
+
     clearForm();
   });
 }
 
 // ==========================
-// DELETE ITEM (WORKING)
+// DELETE ITEM
 // ==========================
 function deleteItem(setId, itemId) {
-
   if (!confirm("Delete item?")) return;
 
   db.collection("equipment_sets")
     .doc(setId)
     .collection("items")
     .doc(itemId)
-    .delete()
-    .then(()=>alert("Deleted"))
-    .catch(err=>alert(err.message));
+    .delete();
 }
 
 // ==========================
 // DELETE SET
 // ==========================
 function deleteSet(setId) {
-
-  if (!confirm("Delete set + items?")) return;
+  if (!confirm("Delete set + all items?")) return;
 
   let ref = db.collection("equipment_sets").doc(setId);
 
-  ref.collection("items").get().then(snap=>{
+  ref.collection("items").get().then(snap => {
     let batch = db.batch();
-    snap.forEach(doc=>batch.delete(doc.ref));
-    batch.commit().then(()=>ref.delete());
+    snap.forEach(doc => batch.delete(doc.ref));
+    batch.commit().then(() => ref.delete());
   });
 }
 
 // ==========================
-// LOAD DATA (🔥 CLEAN)
+// LOAD DATA (🔥 FINAL CLEAN REAL-TIME)
 // ==========================
-let listeners = {}; // 🔥 track listeners
-
 function loadData() {
 
   db.collection("equipment_sets").onSnapshot(setSnap => {
@@ -185,13 +189,13 @@ function loadData() {
       containerCell.colSpan = 10;
 
       let innerTable = document.createElement("table");
-      innerTable.style.width = "100%";
+      innerTable.className = "inner-table"; // 🔥 IMPORTANT
 
       containerCell.appendChild(innerTable);
       containerRow.appendChild(containerCell);
       table.appendChild(containerRow);
 
-      // 🔥 LIVE LISTENER (ONE PER SET)
+      // 🔥 LIVE ITEMS
       let unsubscribe = db.collection("equipment_sets")
         .doc(setId)
         .collection("items")
@@ -212,11 +216,11 @@ function loadData() {
               <td>${i++}</td>
               <td>${item.tag}</td>
               <td>${item.desc}</td>
-              <td>${item.resit}</td>
+              <td>${item.resit || "-"}</td>
               <td>${s.expiry}</td>
               <td><span class="${s.class}">${s.label}</span></td>
-              <td>${item.qty}</td>
-              <td>${item.price}</td>
+              <td>${item.qty || "-"}</td>
+              <td>${item.price || "-"}</td>
               <td>${formatDate(item.date)}</td>
               <td>
                 <button class="btn-delete"

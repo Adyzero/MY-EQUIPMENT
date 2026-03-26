@@ -24,6 +24,7 @@
     h1 {
       text-align: center;
       color: #1f4e79;
+      margin-bottom: 20px;
     }
 
     .card {
@@ -34,19 +35,28 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
+    /* FORM */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      align-items: center;
+    }
+
     input, select {
       padding: 10px;
-      margin: 5px;
       border-radius: 6px;
       border: 1px solid #ccc;
+      width: 100%;
     }
 
-    .form-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
+    label {
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 5px;
     }
 
+    /* BUTTON */
     button {
       padding: 10px 15px;
       border: none;
@@ -56,9 +66,11 @@
     }
 
     .btn-add { background: #28a745; color: white; }
-    .btn-edit { background: #ffc107; }
     .btn-delete { background: #dc3545; color: white; }
 
+    .btn-add:hover { background: #218838; }
+
+    /* TABLE */
     table {
       width: 100%;
       border-collapse: collapse;
@@ -77,22 +89,29 @@
       text-align: center;
     }
 
-    /* GROUP HEADER */
+    /* 🔵 GROUP HEADER (BETTER UI) */
     .group-row {
-      background: #d9edf7;
+      background: #2c5d87;
+      color: white;
       font-weight: bold;
-      cursor: pointer;
     }
 
-    .group-row:hover {
-      background: #cfe8f3;
+    .group-row td {
+      text-align: left;
+      padding: 12px;
     }
 
-    .hidden {
-      display: none;
+    /* INNER TABLE */
+    .inner-table td {
+      padding: 8px;
+      border-bottom: 1px solid #eee;
     }
 
-    /* STATUS LABEL */
+    .inner-table tr:hover {
+      background: #f9f9f9;
+    }
+
+    /* STATUS */
     .label {
       padding: 4px 8px;
       border-radius: 6px;
@@ -104,9 +123,10 @@
     .label-warning { background: orange; color: white; }
     .label-ok { background: green; color: white; }
 
+    /* SEARCH */
     .search-box {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       border-radius: 6px;
       border: 1px solid #ccc;
     }
@@ -124,9 +144,12 @@
 <div class="card">
   <h3>Add Equipment Set</h3>
 
-  <input id="setName" placeholder="Set Name (FLUKE 1732)">
-  <input id="setSerial" placeholder="Serial No">
+  <div class="form-grid">
+    <input id="setName" placeholder="Set Name (FLUKE 1732)">
+    <input id="setSerial" placeholder="Serial No">
+  </div>
 
+  <br>
   <button class="btn-add" onclick="addSet()">➕ Add Set</button>
 </div>
 
@@ -134,7 +157,7 @@
 <div class="card">
   <h3>Add Item to Set</h3>
 
-  <label>Select Equipment Set</label><br>
+  <label>Select Equipment Set</label>
   <select id="setSelect"></select>
 
   <div class="form-grid">
@@ -145,25 +168,34 @@
     <input id="qty" placeholder="Quantity">
     <input id="price" placeholder="Price (RM)">
 
-    <label>Calibration Date</label>
-    <input type="date" id="cal">
+    <div>
+      <label>Calibration Date</label>
+      <input type="date" id="cal">
+    </div>
 
-    <label>Validity (Years)</label>
-    <input type="number" id="validity">
+    <div>
+      <label>Validity (Years)</label>
+      <input type="number" id="validity">
+    </div>
 
-    <label>Purchase Date</label>
-    <input type="date" id="date">
+    <div>
+      <label>Purchase Date</label>
+      <input type="date" id="date">
+    </div>
 
-    <label>Upload Receipt</label>
-    <input type="file" id="receiptFile">
+    <div>
+      <label>Upload Receipt</label>
+      <input type="file" id="receiptFile">
+    </div>
 
-    <label>Upload Certificate</label>
-    <input type="file" id="certFile">
+    <div>
+      <label>Upload Certificate</label>
+      <input type="file" id="certFile">
+    </div>
 
   </div>
 
   <br>
-
   <button class="btn-add" onclick="addEquipment()">➕ Save Item</button>
 </div>
 
