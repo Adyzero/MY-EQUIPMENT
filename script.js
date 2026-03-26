@@ -27,12 +27,23 @@ document.addEventListener("keydown", e => {
 });
 
 // ==========================
-// FILE CLICK (SAFE)
+// FILE CLICK
 document.addEventListener("click", function(e) {
   if (e.target.classList.contains("view-file")) {
     openModal(e.target.getAttribute("data-url"));
   }
 });
+
+// ==========================
+// 🔥 FORMAT CURRENCY (NEW)
+function formatCurrency(value) {
+  if (!value) return "-";
+
+  let num = Number(value.toString().replace(/,/g, ""));
+  if (isNaN(num)) return value;
+
+  return "RM " + num.toLocaleString("en-MY");
+}
 
 // ==========================
 // FILE UPLOAD
@@ -93,7 +104,7 @@ function loadSetDropdown() {
 }
 
 // ==========================
-// 🔥 ADD / UPDATE ITEM (FINAL FIX)
+// ADD / UPDATE ITEM
 async function addEquipment() {
 
   let setId = setSelect.value;
@@ -130,14 +141,13 @@ async function addEquipment() {
     return;
   }
 
-  // 🔥 GUARANTEED UPDATE
   if (editingItem && editingItem.id) {
 
     await db.collection("equipment_sets")
       .doc(editingItem.setId)
       .collection("items")
       .doc(editingItem.id)
-      .set(item, { merge: true }); // safer than update
+      .set(item, { merge: true });
 
     editingItem = null;
 
@@ -154,13 +164,12 @@ async function addEquipment() {
 }
 
 // ==========================
-// 🔥 EDIT ITEM (LOCKED)
+// EDIT ITEM
 function editItem(setId, itemId) {
 
   let set = allData.find(s => s.id === setId);
   let item = set.items.find(i => i.id === itemId);
 
-  // 🔥 HARD LOCK (prevent reset)
   editingItem = { setId: setId, id: itemId };
 
   setSelect.value = setId;
@@ -212,7 +221,7 @@ function renderData(filtered = null) {
         <td>${s.expiry}</td>
         <td><span class="label ${s.class}">${s.label}</span></td>
         <td>${item.qty}</td>
-        <td>${item.price}</td>
+        <td>${formatCurrency(item.price)}</td>
         <td>${formatDate(item.date)}</td>
 
         <td>
