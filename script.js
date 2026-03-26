@@ -8,8 +8,16 @@ let editingItem = null;
 let editingSet = null;
 
 // ==========================
-// 🔥 MODAL VIEWER (IMPROVED)
+// 🔥 MODAL VIEWER (FIXED)
 function openModal(url) {
+
+  if (!url) {
+    alert("No file found");
+    return;
+  }
+
+  console.log("Opening:", url);
+
   const modal = document.getElementById("fileModal");
   const frame = document.getElementById("fileFrame");
 
@@ -25,7 +33,7 @@ function closeModal() {
   frame.src = "";
 }
 
-// ✅ CLICK OUTSIDE CLOSE
+// CLICK OUTSIDE CLOSE
 window.onclick = function (event) {
   const modal = document.getElementById("fileModal");
   if (event.target === modal) {
@@ -33,7 +41,7 @@ window.onclick = function (event) {
   }
 };
 
-// ✅ ESC KEY CLOSE
+// ESC CLOSE
 document.addEventListener("keydown", function (e) {
   if (e.key === "Escape") {
     closeModal();
@@ -239,7 +247,7 @@ function deleteSet(setId) {
 }
 
 // ==========================
-// RENDER (FINAL FIXED)
+// 🔥 RENDER (FIXED BUTTON)
 function renderData(filtered = null) {
 
   let data = filtered || allData;
@@ -279,10 +287,10 @@ function renderData(filtered = null) {
           ${item.resit || "-"}<br>
 
           ${item.receiptUrl ? 
-            `<a href="javascript:void(0)" onclick="openModal('${item.receiptUrl}')">📄 Receipt</a>` : ""}
+            `<button class="file-btn" onclick="openModal('${item.receiptUrl}')">📄 Receipt</button>` : ""}
 
           ${item.certUrl ? 
-            `<br><a href="javascript:void(0)" onclick="openModal('${item.certUrl}')">📑 Cert</a>` : ""}
+            `<br><button class="file-btn" onclick="openModal('${item.certUrl}')">📑 Cert</button>` : ""}
         </td>
 
         <td>${s.expiry}</td>
