@@ -148,11 +148,17 @@ function deleteSet(setId) {
 // ==========================
 // LOAD DATA (🔥 CLEAN)
 // ==========================
+let listeners = {}; // 🔥 track listeners
+
 function loadData() {
 
   db.collection("equipment_sets").onSnapshot(setSnap => {
 
-    table.innerHTML = ""; // clear all
+    table.innerHTML = "";
+
+    // 🔥 remove old listeners
+    Object.values(listeners).forEach(unsub => unsub());
+    listeners = {};
 
     setSnap.forEach(setDoc => {
 
@@ -167,30 +173,31 @@ function loadData() {
         <td colspan="10">
           ▶ <b>${set.name} (${set.serial})</b>
           <button class="btn-delete" style="float:right"
-            onclick="event.stopPropagation(); deleteSet('${setId}')">
-            🗑
-          </button>
+            onclick="deleteSet('${setId}')">🗑</button>
         </td>
       `;
 
       table.appendChild(groupRow);
 
-      // 🔥 PLACEHOLDER FOR ITEMS
-      let itemContainer = document.createElement("tbody");
-      itemContainer.id = "items-" + setId;
+      // 🔥 container row
+      let containerRow = document.createElement("tr");
+      let containerCell = document.createElement("td");
+      containerCell.colSpan = 10;
 
-      table.appendChild(itemContainer);
+      let innerTable = document.createElement("table");
+      innerTable.style.width = "100%";
 
-      // 🔥 LIVE ITEMS (SAFE)
-      db.collection("equipment_sets")
+      containerCell.appendChild(innerTable);
+      containerRow.appendChild(containerCell);
+      table.appendChild(containerRow);
+
+      // 🔥 LIVE LISTENER (ONE PER SET)
+      let unsubscribe = db.collection("equipment_sets")
         .doc(setId)
         .collection("items")
         .onSnapshot(itemSnap => {
 
-          let container = document.getElementById("items-" + setId);
-          if (!container) return;
-
-          container.innerHTML = ""; // clear ONLY this set
+          innerTable.innerHTML = "";
 
           let i = 1;
 
@@ -213,16 +220,16 @@ function loadData() {
               <td>${formatDate(item.date)}</td>
               <td>
                 <button class="btn-delete"
-                  onclick="event.stopPropagation(); deleteItem('${setId}','${doc.id}')">
-                  🗑
-                </button>
+                  onclick="deleteItem('${setId}','${doc.id}')">🗑</button>
               </td>
             `;
 
-            container.appendChild(row);
+            innerTable.appendChild(row);
           });
 
         });
+
+      listeners[setId] = unsubscribe;
 
     });
 
