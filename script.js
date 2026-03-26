@@ -8,16 +8,37 @@ let editingItem = null;
 let editingSet = null;
 
 // ==========================
-// 🔥 MODAL VIEWER
+// 🔥 MODAL VIEWER (IMPROVED)
 function openModal(url) {
-  document.getElementById("fileModal").style.display = "block";
-  document.getElementById("fileFrame").src = url;
+  const modal = document.getElementById("fileModal");
+  const frame = document.getElementById("fileFrame");
+
+  modal.style.display = "block";
+  frame.src = url;
 }
 
 function closeModal() {
-  document.getElementById("fileModal").style.display = "none";
-  document.getElementById("fileFrame").src = "";
+  const modal = document.getElementById("fileModal");
+  const frame = document.getElementById("fileFrame");
+
+  modal.style.display = "none";
+  frame.src = "";
 }
+
+// ✅ CLICK OUTSIDE CLOSE
+window.onclick = function (event) {
+  const modal = document.getElementById("fileModal");
+  if (event.target === modal) {
+    closeModal();
+  }
+};
+
+// ✅ ESC KEY CLOSE
+document.addEventListener("keydown", function (e) {
+  if (e.key === "Escape") {
+    closeModal();
+  }
+});
 
 // ==========================
 // FILE UPLOAD
@@ -138,8 +159,8 @@ async function addEquipment() {
     cal: document.getElementById("cal").value,
     validity: document.getElementById("validity").value,
     date: document.getElementById("date").value,
-    receiptUrl: receiptUrl,
-    certUrl: certUrl
+    receiptUrl,
+    certUrl
   };
 
   if (!item.tag || !item.desc) {
@@ -218,7 +239,71 @@ function deleteSet(setId) {
 }
 
 // ==========================
-// LIVE DATA
+// RENDER (FINAL FIXED)
+function renderData(filtered = null) {
+
+  let data = filtered || allData;
+  table.innerHTML = "";
+
+  data.forEach(set => {
+
+    if (set.items.length === 0) return;
+
+    let groupRow = document.createElement("tr");
+    groupRow.className = "group-row";
+
+    groupRow.innerHTML = `
+      <td colspan="9">▶ <b>${set.name} (${set.serial})</b></td>
+      <td>
+        <button onclick="editSet('${set.id}','${set.name}','${set.serial}')">✏️</button>
+        <button onclick="deleteSet('${set.id}')">🗑</button>
+      </td>
+    `;
+    table.appendChild(groupRow);
+
+    let i = 1;
+
+    set.items.forEach(item => {
+
+      let s = getStatus(item.cal, item.validity);
+
+      let row = document.createElement("tr");
+      if (s.rowClass) row.classList.add(s.rowClass);
+
+      row.innerHTML = `
+        <td>${i++}</td>
+        <td>${item.tag}</td>
+        <td>${item.desc}</td>
+
+        <td>
+          ${item.resit || "-"}<br>
+
+          ${item.receiptUrl ? 
+            `<a href="javascript:void(0)" onclick="openModal('${item.receiptUrl}')">📄 Receipt</a>` : ""}
+
+          ${item.certUrl ? 
+            `<br><a href="javascript:void(0)" onclick="openModal('${item.certUrl}')">📑 Cert</a>` : ""}
+        </td>
+
+        <td>${s.expiry}</td>
+        <td><span class="label ${s.class}">${s.label}</span></td>
+        <td>${item.qty}</td>
+        <td>${item.price}</td>
+        <td>${formatDate(item.date)}</td>
+
+        <td>
+          <button onclick="editItem('${set.id}','${item.id}')">✏️</button>
+          <button onclick="deleteItem('${set.id}','${item.id}')">🗑</button>
+        </td>
+      `;
+
+      table.appendChild(row);
+    });
+
+  });
+}
+
+// ==========================
 function loadData() {
 
   db.collection("equipment_sets").onSnapshot(setSnap => {
@@ -257,68 +342,6 @@ function loadData() {
       listeners[setId] = unsubscribe;
       allData.push(setObj);
 
-    });
-
-  });
-}
-
-// ==========================
-// RENDER (UPDATED MODAL LINK)
-function renderData(filtered = null) {
-
-  let data = filtered || allData;
-  table.innerHTML = "";
-
-  data.forEach(set => {
-
-    if (set.items.length === 0) return;
-
-    let groupRow = document.createElement("tr");
-    groupRow.className = "group-row";
-
-    groupRow.innerHTML = `
-      <td colspan="9">▶ <b>${set.name} (${set.serial})</b></td>
-      <td>
-        <button onclick="editSet('${set.id}','${set.name}','${set.serial}')">✏️</button>
-        <button onclick="deleteSet('${set.id}')">🗑</button>
-      </td>
-    `;
-    table.appendChild(groupRow);
-
-    let i = 1;
-
-    set.items.forEach(item => {
-
-      let s = getStatus(item.cal, item.validity);
-
-      let row = document.createElement("tr");
-      if (s.rowClass) row.classList.add(s.rowClass);
-
-      row.innerHTML = `
-        <td>${i++}</td>
-        <td>${item.tag}</td>
-        <td>${item.desc}</td>
-        <td>
-          ${item.resit || "-"}<br>
-
-          ${item.receiptUrl ? 
-            `<a href="#" onclick="openModal('${item.receiptUrl}')">📄 Receipt</a>` : ""}
-
-          ${item.certUrl ? 
-            `<br><a href="#" onclick="openModal('${item.certUrl}')">📑 Cert</a>` : ""}
-        </td>
-        <td>${s.expiry}</td>
-        <td><span class="label ${s.class}">${s.label}</span></td>
-        <td>${item.qty}</td>
-        <td>${item.price}</td>
-        <td>${formatDate(item.date)}</td>
-        <td>
-          <button onclick="editItem('${set.id}','${item.id}')">✏️</button>
-          <button onclick="deleteItem('${set.id}','${item.id}')">🗑</button>
-        </td>
-      `;
-
-      table.appendChild(row);
     });
 
   });
