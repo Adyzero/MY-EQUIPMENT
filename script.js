@@ -1,10 +1,9 @@
 let table = document.getElementById("tableBody");
 let setSelect = document.getElementById("setSelect");
 
-let listeners = {}; // 🔥 prevent duplicate listeners
+let listeners = {};
+let allData = []; // 🔥 store for search
 
-// ==========================
-// FORMAT DATE
 // ==========================
 function formatDate(dateStr) {
   if (!dateStr) return "-";
@@ -12,8 +11,6 @@ function formatDate(dateStr) {
   return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;
 }
 
-// ==========================
-// EXPIRY STATUS
 // ==========================
 function getStatus(cal, validity) {
   if (!cal || !validity) return { expiry: "-", label: "OK", class: "label-ok" };
@@ -29,8 +26,6 @@ function getStatus(cal, validity) {
 }
 
 // ==========================
-// ADD SET
-// ==========================
 function addSet() {
   let name = document.getElementById("setName").value.trim();
   let serial = document.getElementById("setSerial").value.trim();
@@ -44,8 +39,6 @@ function addSet() {
 }
 
 // ==========================
-// LOAD DROPDOWN
-// ==========================
 function loadSetDropdown() {
   db.collection("equipment_sets").onSnapshot(snap => {
     setSelect.innerHTML = "";
@@ -56,8 +49,6 @@ function loadSetDropdown() {
   });
 }
 
-// ==========================
-// ADD ITEM
 // ==========================
 function addEquipment() {
 
@@ -78,7 +69,7 @@ function addEquipment() {
   };
 
   if (!item.tag || !item.desc) {
-    alert("Please fill Tag & Description");
+    alert("Fill Tag & Description");
     return;
   }
 
@@ -88,8 +79,6 @@ function addEquipment() {
   uploadFiles(item, receiptFile, certFile, setId);
 }
 
-// ==========================
-// UPLOAD FILES
 // ==========================
 function uploadFiles(item, receiptFile, certFile, setId) {
 
@@ -124,8 +113,6 @@ function uploadFiles(item, receiptFile, certFile, setId) {
 }
 
 // ==========================
-// DELETE ITEM
-// ==========================
 function deleteItem(setId, itemId) {
   if (!confirm("Delete item?")) return;
 
@@ -136,8 +123,6 @@ function deleteItem(setId, itemId) {
     .delete();
 }
 
-// ==========================
-// DELETE SET
 // ==========================
 function deleteSet(setId) {
   if (!confirm("Delete set + all items?")) return;
@@ -152,15 +137,15 @@ function deleteSet(setId) {
 }
 
 // ==========================
-// LOAD DATA (🔥 FINAL CLEAN REAL-TIME)
+// 🔥 LOAD DATA + STORE FOR SEARCH
 // ==========================
 function loadData() {
 
   db.collection("equipment_sets").onSnapshot(setSnap => {
 
     table.innerHTML = "";
+    allData = [];
 
-    // 🔥 remove old listeners
     Object.values(listeners).forEach(unsub => unsub());
     listeners = {};
 
@@ -169,75 +154,133 @@ function loadData() {
       let set = setDoc.data();
       let setId = setDoc.id;
 
-      // 🔵 GROUP HEADER
-      let groupRow = document.createElement("tr");
-      groupRow.className = "group-row";
+      let setObj = {
+        id: setId,
+        name: set.name,
+        serial: set.serial,
+        items: []
+      };
 
-      groupRow.innerHTML = `
-        <td colspan="10">
-          ▶ <b>${set.name} (${set.serial})</b>
-          <button class="btn-delete" style="float:right"
-            onclick="deleteSet('${setId}')">🗑</button>
-        </td>
-      `;
-
-      table.appendChild(groupRow);
-
-      // 🔥 container row
-      let containerRow = document.createElement("tr");
-      let containerCell = document.createElement("td");
-      containerCell.colSpan = 10;
-
-      let innerTable = document.createElement("table");
-      innerTable.className = "inner-table"; // 🔥 IMPORTANT
-
-      containerCell.appendChild(innerTable);
-      containerRow.appendChild(containerCell);
-      table.appendChild(containerRow);
-
-      // 🔥 LIVE ITEMS
       let unsubscribe = db.collection("equipment_sets")
         .doc(setId)
         .collection("items")
         .onSnapshot(itemSnap => {
 
-          innerTable.innerHTML = "";
-
-          let i = 1;
-
+          setObj.items = [];
           itemSnap.forEach(doc => {
-
-            let item = doc.data();
-            let s = getStatus(item.cal, item.validity);
-
-            let row = document.createElement("tr");
-
-            row.innerHTML = `
-              <td>${i++}</td>
-              <td>${item.tag}</td>
-              <td>${item.desc}</td>
-              <td>${item.resit || "-"}</td>
-              <td>${s.expiry}</td>
-              <td><span class="${s.class}">${s.label}</span></td>
-              <td>${item.qty || "-"}</td>
-              <td>${item.price || "-"}</td>
-              <td>${formatDate(item.date)}</td>
-              <td>
-                <button class="btn-delete"
-                  onclick="deleteItem('${setId}','${doc.id}')">🗑</button>
-              </td>
-            `;
-
-            innerTable.appendChild(row);
+            setObj.items.push({ id: doc.id, ...doc.data() });
           });
 
+          renderData(); // 🔥 LIVE UPDATE
         });
 
       listeners[setId] = unsubscribe;
+      allData.push(setObj);
 
     });
 
   });
+}
+
+// ==========================
+// 🔥 RENDER FUNCTION
+// ==========================
+function renderData(filtered = null) {
+
+  let data = filtered || allData;
+
+  table.innerHTML = "";
+
+  data.forEach(set => {
+
+    if (set.items.length === 0) return;
+
+    // GROUP HEADER
+    let groupRow = document.createElement("tr");
+    groupRow.className = "group-row";
+
+    groupRow.innerHTML = `
+      <td colspan="10">
+        ▶ <b>${set.name} (${set.serial})</b>
+        <button class="btn-delete" style="float:right"
+          onclick="deleteSet('${set.id}')">🗑</button>
+      </td>
+    `;
+    table.appendChild(groupRow);
+
+    let i = 1;
+
+    set.items.forEach(item => {
+
+      let s = getStatus(item.cal, item.validity);
+
+      let row = document.createElement("tr");
+
+      row.innerHTML = `
+        <td>${i++}</td>
+        <td>${item.tag}</td>
+        <td>${item.desc}</td>
+        <td>${item.resit || "-"}</td>
+        <td>${s.expiry}</td>
+        <td><span class="${s.class}">${s.label}</span></td>
+        <td>${item.qty || "-"}</td>
+        <td>${item.price || "-"}</td>
+        <td>${formatDate(item.date)}</td>
+        <td>
+          <button class="btn-delete"
+            onclick="deleteItem('${set.id}','${item.id}')">🗑</button>
+        </td>
+      `;
+
+      table.appendChild(row);
+    });
+
+  });
+
+}
+
+// ==========================
+// 🔍 SEARCH (FINAL WORKING)
+// ==========================
+function searchTable() {
+
+  let keyword = document.getElementById("search").value.toLowerCase();
+
+  if (!keyword) {
+    renderData();
+    return;
+  }
+
+  let filtered = [];
+
+  allData.forEach(set => {
+
+    let matchSet = (set.name + " " + set.serial).toLowerCase().includes(keyword);
+
+    let matchedItems = set.items.filter(item => {
+      let text = (
+        item.tag + " " +
+        item.desc + " " +
+        item.resit + " " +
+        item.qty + " " +
+        item.price + " " +
+        item.cal + " " +
+        item.date
+      ).toLowerCase();
+
+      return text.includes(keyword);
+    });
+
+    if (matchSet || matchedItems.length > 0) {
+      filtered.push({
+        ...set,
+        items: matchSet ? set.items : matchedItems
+      });
+    }
+
+  });
+
+  renderData(filtered);
 }
 
 // ==========================

@@ -25,6 +25,7 @@
       text-align: center;
       color: #1f4e79;
       margin-bottom: 20px;
+      letter-spacing: 1px;
     }
 
     .card {
@@ -35,7 +36,12 @@
       box-shadow: 0 6px 18px rgba(0,0,0,0.08);
     }
 
-    /* 🔥 FORM LAYOUT */
+    h3 {
+      color: #1f4e79;
+      margin-bottom: 10px;
+    }
+
+    /* FORM */
     .form-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -62,9 +68,10 @@
       padding: 10px;
       border-radius: 8px;
       border: 1px solid #ccc;
+      font-size: 13px;
     }
 
-    input:focus {
+    input:focus, select:focus {
       border-color: #1f4e79;
       outline: none;
     }
@@ -88,6 +95,27 @@
       color: white;
     }
 
+    /* 🔍 SEARCH (FIXED NICE LOOK) */
+    .search-wrapper {
+      max-width: 500px;
+      margin: auto;
+    }
+
+    #search {
+      width: 100%;
+      padding: 12px 18px;
+      border-radius: 30px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      transition: 0.3s;
+    }
+
+    #search:focus {
+      border-color: #1f4e79;
+      box-shadow: 0 0 8px rgba(31,78,121,0.2);
+      outline: none;
+    }
+
     /* TABLE */
     table {
       width: 100%;
@@ -107,7 +135,11 @@
       text-align: center;
     }
 
-    /* 🔵 GROUP HEADER */
+    tr:hover {
+      background: #f8fbff;
+    }
+
+    /* GROUP HEADER */
     .group-row {
       background: linear-gradient(135deg, #2c5d87, #3b7cb5);
       color: white;
@@ -117,10 +149,7 @@
     .group-row td {
       text-align: left;
       padding: 14px;
-    }
-
-    .inner-table td {
-      padding: 8px;
+      font-size: 14px;
     }
 
     /* STATUS */
@@ -134,18 +163,6 @@
     .label-expired { background: #dc3545; color: white; }
     .label-warning { background: #ffc107; color: black; }
     .label-ok { background: #28a745; color: white; }
-
-    /* SEARCH */
-    .search-box {
-      width: 100%;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
-
-    h3 {
-      color: #1f4e79;
-    }
 
   </style>
 </head>
@@ -245,9 +262,11 @@
 
 <!-- SEARCH -->
 <div class="card">
-  <input type="text" id="search" class="search-box"
-    placeholder="🔍 Search equipment..."
-    onkeyup="searchTable()">
+  <div class="search-wrapper">
+    <input type="text" id="search"
+      placeholder="🔍 Search equipment, tag, serial..."
+      onkeyup="searchTable()">
+  </div>
 </div>
 
 <!-- TABLE -->
