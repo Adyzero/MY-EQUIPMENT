@@ -46,23 +46,29 @@ document.addEventListener("click", function(e) {
 });
 
 // ==========================
-// FORMAT CURRENCY
+// ✅ FORMAT CURRENCY (WITH CENTS)
 function formatCurrency(value) {
   if (!value) return "-";
 
-  let clean = value.toString().replace(/[^\d]/g, "");
-  let num = Number(clean);
+  let num = parseFloat(value);
 
   if (isNaN(num)) return "-";
 
-  return "RM " + num.toLocaleString("en-MY");
+  return "RM " + num.toLocaleString("en-MY", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
 }
 
 // ==========================
-// LIVE INPUT FORMAT
+// ✅ INPUT PRICE (ALLOW DECIMAL)
 document.getElementById("price").addEventListener("input", function(e) {
-  let value = e.target.value.replace(/[^\d]/g, "");
-  e.target.value = Number(value || 0).toLocaleString("en-MY");
+
+  let value = e.target.value
+    .replace(/[^\d.]/g, "")        // allow dot
+    .replace(/(\..*)\./g, '$1');   // only 1 dot
+
+  e.target.value = value;
 });
 
 // ==========================
@@ -153,7 +159,7 @@ async function addEquipment() {
     desc: document.getElementById("desc").value.trim(),
     resit: document.getElementById("resit").value.trim(),
     qty: document.getElementById("qty").value.trim(),
-    price: document.getElementById("price").value.replace(/[^\d]/g, ""),
+    price: document.getElementById("price").value, // ✅ KEEP DECIMAL
     cal: document.getElementById("cal").value,
     validity: document.getElementById("validity").value,
     date: document.getElementById("date").value,
@@ -281,7 +287,7 @@ function loadData() {
 }
 
 // ==========================
-// SEARCH (FINAL)
+// SEARCH
 function searchTable() {
 
   let keyword = document.getElementById("search").value.toLowerCase().trim();
