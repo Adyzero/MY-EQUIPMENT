@@ -25,7 +25,6 @@
       text-align: center;
       color: #1f4e79;
       margin-bottom: 20px;
-      letter-spacing: 1px;
     }
 
     .card {
@@ -34,37 +33,40 @@
       border-radius: 14px;
       margin-bottom: 20px;
       box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-      transition: 0.2s;
     }
 
-    .card:hover {
-      transform: translateY(-2px);
-    }
-
-    /* FORM GRID */
+    /* 🔥 FORM LAYOUT */
     .form-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group.full {
+      grid-column: span 2;
+    }
+
+    label {
+      font-size: 12px;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #444;
     }
 
     input, select {
       padding: 10px;
       border-radius: 8px;
       border: 1px solid #ccc;
-      width: 100%;
-      transition: 0.2s;
     }
 
-    input:focus, select:focus {
+    input:focus {
       border-color: #1f4e79;
       outline: none;
-    }
-
-    label {
-      font-size: 12px;
-      font-weight: 600;
-      color: #555;
     }
 
     /* BUTTON */
@@ -86,10 +88,6 @@
       color: white;
     }
 
-    .btn-add:hover {
-      opacity: 0.9;
-    }
-
     /* TABLE */
     table {
       width: 100%;
@@ -109,10 +107,6 @@
       text-align: center;
     }
 
-    tr:hover {
-      background: #f8fbff;
-    }
-
     /* 🔵 GROUP HEADER */
     .group-row {
       background: linear-gradient(135deg, #2c5d87, #3b7cb5);
@@ -123,10 +117,8 @@
     .group-row td {
       text-align: left;
       padding: 14px;
-      font-size: 14px;
     }
 
-    /* INNER TABLE */
     .inner-table td {
       padding: 8px;
     }
@@ -151,9 +143,7 @@
       border: 1px solid #ccc;
     }
 
-    /* SECTION TITLE */
     h3 {
-      margin-bottom: 10px;
       color: #1f4e79;
     }
 
@@ -171,8 +161,15 @@
   <h3>📦 Add Equipment Set</h3>
 
   <div class="form-grid">
-    <input id="setName" placeholder="Set Name (FLUKE 1732)">
-    <input id="setSerial" placeholder="Serial No">
+    <div class="form-group">
+      <label>Set Name</label>
+      <input id="setName">
+    </div>
+
+    <div class="form-group">
+      <label>Serial No</label>
+      <input id="setSerial">
+    </div>
   </div>
 
   <br>
@@ -189,36 +186,57 @@
   <br><br>
 
   <div class="form-grid">
-    <input id="tag" placeholder="Tag">
-    <input id="desc" placeholder="Description">
-    <input id="resit" placeholder="Receipt No">
-    <input id="qty" placeholder="Quantity">
-    <input id="price" placeholder="Price (RM)">
 
-    <div>
+    <div class="form-group">
+      <label>Tag</label>
+      <input id="tag">
+    </div>
+
+    <div class="form-group">
+      <label>Description</label>
+      <input id="desc">
+    </div>
+
+    <div class="form-group">
+      <label>Receipt No</label>
+      <input id="resit">
+    </div>
+
+    <div class="form-group">
+      <label>Quantity</label>
+      <input id="qty">
+    </div>
+
+    <div class="form-group">
+      <label>Price (RM)</label>
+      <input id="price">
+    </div>
+
+    <div class="form-group">
       <label>Calibration Date</label>
       <input type="date" id="cal">
     </div>
 
-    <div>
+    <div class="form-group">
       <label>Validity (Years)</label>
       <input type="number" id="validity">
     </div>
 
-    <div>
+    <div class="form-group">
       <label>Purchase Date</label>
       <input type="date" id="date">
     </div>
 
-    <div>
+    <div class="form-group full">
       <label>Upload Receipt</label>
       <input type="file" id="receiptFile">
     </div>
 
-    <div>
+    <div class="form-group full">
       <label>Upload Certificate</label>
       <input type="file" id="certFile">
     </div>
+
   </div>
 
   <br>
