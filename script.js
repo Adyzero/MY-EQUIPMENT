@@ -400,17 +400,3 @@ function searchTable() {
 
   renderData(filtered);
 }
-
-let searchTimeout;
-
-function searchTable() {
-  clearTimeout(searchTimeout);
-
-  searchTimeout = setTimeout(() => {
-    performSearch();
-  }, 200);
-}
-
-function performSearch() {
-  // paste main search logic here
-}
