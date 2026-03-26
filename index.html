@@ -95,6 +95,11 @@ input:focus {
 }
 
 /* TABLE */
+.card table {
+  display: block;
+  overflow-x: auto; /* 🔥 horizontal scroll */
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -104,11 +109,18 @@ th {
   background: #1f4e79;
   color: white;
   padding: 12px;
+  font-size: 13px;
 }
 
 td {
   padding: 10px;
   text-align: center;
+  font-size: 13px;
+
+  /* 🔥 NO WRAP + CLEAN */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* GROUP */
@@ -138,10 +150,6 @@ td {
   50% { opacity: 0.4; }
 }
 
-.row-expired {
-  background: #fff5f5;
-}
-
 /* MODAL */
 .modal {
   display: none;
@@ -152,21 +160,11 @@ td {
   background: rgba(0,0,0,0.8);
 }
 
-.modal iframe {
-  width: 90%;
-  height: 90%;
-  margin: 40px auto;
-  display: block;
-  border-radius: 10px;
-  background: white;
-}
-
 .close {
   position: absolute;
   top: 10px;
   right: 25px;
-  color: white;
-  font-size: 35px;
+  font-size: 30px;
   cursor: pointer;
 }
 </style>
@@ -275,23 +273,8 @@ td {
     border-radius:10px;
     overflow:hidden;
   ">
-
-    <span class="close" onclick="closeModal()" style="
-      position:absolute;
-      top:10px;
-      right:20px;
-      color:black;
-      font-size:30px;
-      z-index:10;
-      cursor:pointer;
-    ">&times;</span>
-
-    <iframe id="fileFrame" style="
-      width:100%;
-      height:100%;
-      border:none;
-    "></iframe>
-
+    <span class="close" onclick="closeModal()">&times;</span>
+    <iframe id="fileFrame" style="width:100%; height:100%; border:none;"></iframe>
   </div>
 </div>
 
