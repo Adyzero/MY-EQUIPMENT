@@ -8,7 +8,7 @@
   <!-- FONT -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
- <style>
+<style>
   body {
     font-family: 'Poppins', sans-serif;
     background: linear-gradient(135deg, #eef3f9, #d9e6f2);
@@ -183,35 +183,53 @@
     transform: scale(1.01);
   }
 
-  /* STATUS BADGES */
+  /* 🔥 NEW STATUS STYLE */
   .label {
-    padding: 5px 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
     border-radius: 20px;
     font-size: 11px;
-    font-weight: bold;
-    display: inline-block;
+    font-weight: 600;
   }
 
+  .label::before {
+    font-size: 12px;
+  }
+
+  /* OK */
   .label-ok {
-    background: #28a745;
-    color: white;
+    background: #e6f7ee;
+    color: #1e7e34;
+  }
+  .label-ok::before {
+    content: "✔";
   }
 
+  /* WARNING */
   .label-warning {
-    background: #ffc107;
-    color: black;
+    background: #fff4e0;
+    color: #b8860b;
+  }
+  .label-warning::before {
+    content: "⚠";
   }
 
+  /* EXPIRED */
   .label-expired {
-    background: #dc3545;
-    color: white;
+    background: #fdecea;
+    color: #b02a37;
     animation: pulse 1.2s infinite;
   }
+  .label-expired::before {
+    content: "✖";
+  }
 
-  /* 🔴 BLINK EFFECT (SMOOTH) */
+  /* BLINK EFFECT */
   @keyframes pulse {
     0% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.08); opacity: 0.7; }
+    50% { transform: scale(1.08); opacity: 0.75; }
     100% { transform: scale(1); opacity: 1; }
   }
 
