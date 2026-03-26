@@ -150,11 +150,11 @@ function deleteSet(setId) {
 // ==========================
 function loadData() {
 
-  db.collection("equipment_sets").onSnapshot(async (setSnap) => {
+  db.collection("equipment_sets").onSnapshot(setSnap => {
 
-    table.innerHTML = ""; // clear table
+    table.innerHTML = ""; // clear all
 
-    for (const setDoc of setSnap.docs) {
+    setSnap.forEach(setDoc => {
 
       let set = setDoc.data();
       let setId = setDoc.id;
@@ -175,43 +175,56 @@ function loadData() {
 
       table.appendChild(groupRow);
 
-      // 🔥 GET ITEMS ONCE (NO onSnapshot)
-      let itemSnap = await db.collection("equipment_sets")
+      // 🔥 PLACEHOLDER FOR ITEMS
+      let itemContainer = document.createElement("tbody");
+      itemContainer.id = "items-" + setId;
+
+      table.appendChild(itemContainer);
+
+      // 🔥 LIVE ITEMS (SAFE)
+      db.collection("equipment_sets")
         .doc(setId)
         .collection("items")
-        .get();
+        .onSnapshot(itemSnap => {
 
-      let i = 1;
+          let container = document.getElementById("items-" + setId);
+          if (!container) return;
 
-      itemSnap.forEach(doc => {
+          container.innerHTML = ""; // clear ONLY this set
 
-        let item = doc.data();
-        let s = getStatus(item.cal, item.validity);
+          let i = 1;
 
-        let row = document.createElement("tr");
+          itemSnap.forEach(doc => {
 
-        row.innerHTML = `
-          <td>${i++}</td>
-          <td>${item.tag}</td>
-          <td>${item.desc}</td>
-          <td>${item.resit}</td>
-          <td>${s.expiry}</td>
-          <td><span class="${s.class}">${s.label}</span></td>
-          <td>${item.qty}</td>
-          <td>${item.price}</td>
-          <td>${formatDate(item.date)}</td>
-          <td>
-            <button class="btn-delete"
-              onclick="event.stopPropagation(); deleteItem('${setId}','${doc.id}')">
-              🗑
-            </button>
-          </td>
-        `;
+            let item = doc.data();
+            let s = getStatus(item.cal, item.validity);
 
-        table.appendChild(row);
-      });
+            let row = document.createElement("tr");
 
-    }
+            row.innerHTML = `
+              <td>${i++}</td>
+              <td>${item.tag}</td>
+              <td>${item.desc}</td>
+              <td>${item.resit}</td>
+              <td>${s.expiry}</td>
+              <td><span class="${s.class}">${s.label}</span></td>
+              <td>${item.qty}</td>
+              <td>${item.price}</td>
+              <td>${formatDate(item.date)}</td>
+              <td>
+                <button class="btn-delete"
+                  onclick="event.stopPropagation(); deleteItem('${setId}','${doc.id}')">
+                  🗑
+                </button>
+              </td>
+            `;
+
+            container.appendChild(row);
+          });
+
+        });
+
+    });
 
   });
 }
