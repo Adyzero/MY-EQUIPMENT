@@ -7,10 +7,19 @@ let editingItem = null;
 // ==========================
 // MODAL
 function openModal(url) {
-  if (!url) return alert("No file found");
 
-  document.getElementById("fileModal").style.display = "block";
-  document.getElementById("fileFrame").src = url;
+  console.log("OPEN MODAL:", url);
+
+  let modal = document.getElementById("fileModal");
+  let frame = document.getElementById("fileFrame");
+
+  if (!modal || !frame) {
+    alert("Modal not found");
+    return;
+  }
+
+  frame.src = url;
+  modal.style.display = "block";
 }
 
 function closeModal() {
@@ -43,7 +52,7 @@ document.addEventListener("click", function(e) {
       return;
     }
 
-    openModal(url);
+    window.open(url, "_blank");
   }
 });
 
