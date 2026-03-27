@@ -143,9 +143,11 @@ async function addEquipment() {
 
   let receiptFile = document.getElementById("receiptFile").files[0];
   let certFile = document.getElementById("certFile").files[0];
+  let imageFile = document.getElementById("itemImage").files[0];
 
   let receiptUrl = await uploadFile(receiptFile, `receipt/${Date.now()}`);
   let certUrl = await uploadFile(certFile, `cert/${Date.now()}`);
+  let imageUrl = await uploadFile(imageFile, `itemImage/${Date.now()}`);
 
   let oldItem = null;
 
@@ -168,6 +170,7 @@ async function addEquipment() {
 
     receiptUrl: receiptUrl || (oldItem ? oldItem.receiptUrl : ""),
     certUrl: certUrl || (oldItem ? oldItem.certUrl : "")
+    imageUrl: imageUrl || (oldItem ? oldItem.imageUrl : ""),
   };
 
   if (!item.tag || !item.desc) {
@@ -220,7 +223,11 @@ function renderData(filtered = null) {
       table.innerHTML += `
       <tr>
         <td>${i+1}</td>
-        <td>${item.tag}</td>
+        <td>
+          ${item.imageUrl 
+            ? `<span class="tag-click" onclick="showImage('${item.imageUrl}')">${item.tag}</span>` 
+            : item.tag}
+        </td>
         <td>${item.desc}</td>
 
         <td>
@@ -424,6 +431,25 @@ function clearForm() {
 
   document.getElementById("receiptFile").value = "";
   document.getElementById("certFile").value = "";
+  document.getElementById("itemImage").value = "";
 
   editingItem = null;
 }
+
+function showImage(url) {
+  let modal = document.getElementById("imageModal");
+  let img = document.getElementById("modalImg");
+
+  img.src = url;
+  modal.style.display = "block";
+}
+
+function closeImage() {
+  document.getElementById("imageModal").style.display = "none";
+}
+
+// optional: click outside close
+window.addEventListener("click", function(e){
+  let modal = document.getElementById("imageModal");
+  if (e.target === modal) closeImage();
+});
