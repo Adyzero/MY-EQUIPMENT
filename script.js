@@ -169,7 +169,7 @@ async function addEquipment() {
     createdAt: editingItem ? oldItem?.createdAt || Date.now() : Date.now(),
 
     receiptUrl: receiptUrl || (oldItem ? oldItem.receiptUrl : ""),
-    certUrl: certUrl || (oldItem ? oldItem.certUrl : "")
+    certUrl: certUrl || (oldItem ? oldItem.certUrl : ""),
     imageUrl: imageUrl || (oldItem ? oldItem.imageUrl : ""),
   };
 
