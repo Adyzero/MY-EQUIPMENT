@@ -348,3 +348,82 @@ window.onload = function () {
   loadSetDropdown();
   loadData();
 };
+
+function editItem(setId, itemId) {
+
+  let set = allData.find(s => s.id === setId);
+  if (!set) return;
+
+  let item = set.items.find(i => i.id === itemId);
+  if (!item) return;
+
+  // fill form
+  document.getElementById("tag").value = item.tag || "";
+  document.getElementById("desc").value = item.desc || "";
+  document.getElementById("resit").value = item.resit || "";
+  document.getElementById("qty").value = item.qty || "";
+  document.getElementById("price").value = item.price || "";
+  document.getElementById("cal").value = item.cal || "";
+  document.getElementById("validity").value = item.validity || "";
+  document.getElementById("date").value = item.date || "";
+
+  setSelect.value = setId;
+
+  editingItem = {
+    setId: setId,
+    id: itemId
+  };
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+async function deleteItem(setId, itemId) {
+
+  if (!confirm("Delete this item?")) return;
+
+  await db.collection("equipment_sets")
+    .doc(setId)
+    .collection("items")
+    .doc(itemId)
+    .delete();
+}
+
+async function deleteSet(setId) {
+
+  if (!confirm("Delete entire equipment set?")) return;
+
+  let itemsSnap = await db.collection("equipment_sets")
+    .doc(setId)
+    .collection("items")
+    .get();
+
+  // delete all items first
+  let batch = db.batch();
+
+  itemsSnap.forEach(doc => {
+    batch.delete(doc.ref);
+  });
+
+  await batch.commit();
+
+  // delete set
+  await db.collection("equipment_sets")
+    .doc(setId)
+    .delete();
+}
+
+function clearForm() {
+  document.getElementById("tag").value = "";
+  document.getElementById("desc").value = "";
+  document.getElementById("resit").value = "";
+  document.getElementById("qty").value = "";
+  document.getElementById("price").value = "";
+  document.getElementById("cal").value = "";
+  document.getElementById("validity").value = "";
+  document.getElementById("date").value = "";
+
+  document.getElementById("receiptFile").value = "";
+  document.getElementById("certFile").value = "";
+
+  editingItem = null;
+}
