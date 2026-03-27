@@ -26,7 +26,14 @@ function closeModal() {
 
 window.onclick = function (event) {
   if (event.target.id === "fileModal") closeModal();
-};
+}
+
+window.addEventListener("click", function(e) {
+  let modal = document.getElementById("imageModal");
+  if (e.target === modal) {
+    modal.style.display = "none";
+  }
+});
 
 // ==========================
 // CLICK FILE
@@ -224,9 +231,9 @@ function renderData(filtered = null) {
       <tr>
         <td>${i+1}</td>
         <td>
-          ${item.imageUrl 
-            ? `<span class="tag-click" onclick="showImage('${item.imageUrl}')">${item.tag}</span>` 
-            : item.tag}
+          <span class="tag-link" onclick="handleTagClick('${item.imageUrl || ""}')">
+            ${item.tag}
+          </span>
         </td>
         <td>${item.desc}</td>
 
@@ -437,11 +444,17 @@ function clearForm() {
 }
 
 function showImage(url) {
+
   let modal = document.getElementById("imageModal");
   let img = document.getElementById("modalImg");
 
+  if (!modal || !img) {
+    console.error("Modal not found");
+    return;
+  }
+
   img.src = url;
-  modal.style.display = "block";
+  modal.style.display = "flex"; // better center
 }
 
 function closeImage() {
@@ -453,3 +466,13 @@ window.addEventListener("click", function(e){
   let modal = document.getElementById("imageModal");
   if (e.target === modal) closeImage();
 });
+
+function handleTagClick(url) {
+
+  if (!url) {
+    alert("No image available for this item");
+    return;
+  }
+
+  showImage(url);
+}
