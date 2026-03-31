@@ -96,8 +96,7 @@ input:focus {
 
 /* TABLE */
 .card table {
-  display: block;
-  overflow-x: auto;
+  width: 100%;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -113,8 +112,8 @@ table {
 th {
   background: #1f4e79;
   color: white;
-  padding: 12px;
-  font-size: 13px;
+  padding: 10px;
+  font-size: 12px;
 }
 
 td {
@@ -122,10 +121,25 @@ td {
   text-align: center;
   font-size: 13px;
 
-  /* 🔥 NO WRAP + CLEAN */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+ td {
+  padding: 10px;
+  text-align: center;
+  font-size: 13px;
+
+  white-space: normal;     /* ✅ allow wrap */
+  word-break: break-word;  /* ✅ break long text */
+}
+
+th:nth-child(1), td:nth-child(1) { width: 40px; }   /* No */
+th:nth-child(2), td:nth-child(2) { width: 140px; }  /* Tag */
+th:nth-child(3), td:nth-child(3) { width: 220px; }  /* Description */
+th:nth-child(4), td:nth-child(4) { width: 160px; }  /* Receipt */
+th:nth-child(5), td:nth-child(5) { width: 100px; }  /* Expiry */
+th:nth-child(6), td:nth-child(6) { width: 120px; }  /* Status */
+th:nth-child(7), td:nth-child(7) { width: 100px; }  /* Qty */
+th:nth-child(8), td:nth-child(8) { width: 120px; }  /* Price */
+th:nth-child(9), td:nth-child(9) { width: 120px; }  /* Purchase */
+th:nth-child(10), td:nth-child(10) { width: 100px; } /* Action */
 }
 
 /* GROUP */
