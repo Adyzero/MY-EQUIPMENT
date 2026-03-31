@@ -105,6 +105,15 @@ table {
   table-layout: fixed;
 }
 
+/* ✅ ONLY Description column can wrap */
+td:nth-child(3) {
+  white-space: normal;       /* allow wrap */
+  overflow: visible;         
+  text-overflow: unset;      
+  word-break: break-word;    
+  text-align: left;          /* optional: nicer look */
+}
+
 /* HEADER */
 th {
   background: #1f4e79;
