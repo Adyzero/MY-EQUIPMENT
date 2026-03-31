@@ -260,6 +260,8 @@ function renderData(filtered = null) {
     });
 
   });
+   // ✅ ADD THIS LINE
+  calculateSummary(data);
 }
 
 // ==========================
@@ -475,4 +477,47 @@ function handleTagClick(url) {
   }
 
   showImage(url);
+}
+
+// ==========================
+// SUMMARY CALCULATION
+function calculateSummary(data) {
+
+  let totalItems = 0;
+  let totalValue = 0;
+  let totalExpired = 0;
+  let totalDue = 0;
+
+  data.forEach(set => {
+    set.items.forEach(item => {
+
+      totalItems++;
+
+      let price = parseFloat(item.price);
+      if (!isNaN(price)) {
+        totalValue += price;
+      }
+
+      let status = getStatus(item.cal, item.validity);
+
+      if (status.label.includes("EXPIRED")) {
+        totalExpired++;
+      } 
+      else if (status.label.includes("DUE SOON")) {
+        totalDue++;
+      }
+
+    });
+  });
+
+  document.getElementById("totalItems").innerText = totalItems;
+
+  document.getElementById("totalValue").innerText =
+    "RM " + totalValue.toLocaleString("en-MY", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+  document.getElementById("totalExpired").innerText = totalExpired;
+  document.getElementById("totalDue").innerText = totalDue;
 }
