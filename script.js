@@ -36,7 +36,7 @@ window.addEventListener("click", function(e) {
 });
 
 // ==========================
-// CLICK FILE (OPEN IN MODAL)
+// CLICK FILE
 document.addEventListener("click", function(e) {
   let btn = e.target.closest(".view-file");
 
@@ -48,7 +48,7 @@ document.addEventListener("click", function(e) {
       return;
     }
 
-    openModal(url); // ✅ use modal instead
+    window.open(url, "_blank");
   }
 });
 

@@ -97,7 +97,12 @@ input:focus {
 /* TABLE */
 .card table {
   display: block;
-  overflow-x: auto; /* 🔥 horizontal scroll */
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+table {
+  min-width: 900px; /* force full table width */
 }
 
 table {
