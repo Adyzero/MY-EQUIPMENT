@@ -298,13 +298,17 @@ th:nth-child(10), td:nth-child(10) { width: 70px; } /* Action */
 
   <div><b>Total Value:</b> <span id="totalValue">RM 0.00</span></div>
 
-  <div style="color:#d90429;">
-    <b>Expired:</b> <span id="totalExpired">0</span>
-  </div>
+  <div style="color:#d90429; cursor:pointer;" data-filter="expired" onclick="filterStatus('expired')">
+  <b>Expired:</b> <span id="totalExpired">0</span>
+</div>
 
-  <div style="color:#cc7a00;">
-    <b>Due Soon:</b> <span id="totalDue">0</span>
-  </div>
+<div style="color:#cc7a00; cursor:pointer;" data-filter="due" onclick="filterStatus('due')">
+  <b>Due Soon:</b> <span id="totalDue">0</span>
+</div>
+
+<div style="cursor:pointer;" data-filter="all" onclick="filterStatus('all')">
+  <b>Show All</b>
+</div>
 
 </div>
 

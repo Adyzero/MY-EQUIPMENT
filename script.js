@@ -521,3 +521,52 @@ function calculateSummary(data) {
   document.getElementById("totalExpired").innerText = totalExpired;
   document.getElementById("totalDue").innerText = totalDue;
 }
+
+function filterStatus(type) {
+
+  // 🔥 RESET STYLE (remove bold from all)
+  document.querySelectorAll('[data-filter]').forEach(el => {
+    el.style.fontWeight = "normal";
+  });
+
+  // 🔥 HIGHLIGHT ACTIVE
+  let activeEl = document.querySelector(`[data-filter="${type}"]`);
+  if (activeEl) activeEl.style.fontWeight = "bold";
+
+  // =====================
+
+  if (type === "all") {
+    renderData();
+    return;
+  }
+
+  let filtered = [];
+
+  allData.forEach(set => {
+
+    let filteredItems = set.items.filter(item => {
+
+      let status = getStatus(item.cal, item.validity);
+
+      if (type === "expired") {
+        return status.label.includes("EXPIRED");
+      }
+
+      if (type === "due") {
+        return status.label.includes("DUE SOON");
+      }
+
+      return false;
+    });
+
+    if (filteredItems.length > 0) {
+      filtered.push({
+        ...set,
+        items: filteredItems
+      });
+    }
+
+  });
+
+  renderData(filtered);
+}
