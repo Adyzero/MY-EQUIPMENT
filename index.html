@@ -105,15 +105,15 @@ table {
 }
 
 table {
+  table-layout: fixed; /* 🔥 important */
   width: 100%;
-  border-collapse: collapse;
 }
 
 th {
   background: #1f4e79;
   color: white;
-  padding: 10px;
-  font-size: 12px;
+  padding: 8px;
+  font-size: 11px;
 }
 
 td {
@@ -122,24 +122,23 @@ td {
   font-size: 13px;
 
  td {
-  padding: 10px;
-  text-align: center;
-  font-size: 13px;
-
-  white-space: normal;     /* ✅ allow wrap */
-  word-break: break-word;  /* ✅ break long text */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* cut nicely */
+  font-size: 12px; /* 🔥 smaller */
+  padding: 6px 8px; /* 🔥 tighter */
 }
 
-th:nth-child(1), td:nth-child(1) { width: 40px; }   /* No */
-th:nth-child(2), td:nth-child(2) { width: 140px; }  /* Tag */
-th:nth-child(3), td:nth-child(3) { width: 220px; }  /* Description */
-th:nth-child(4), td:nth-child(4) { width: 160px; }  /* Receipt */
-th:nth-child(5), td:nth-child(5) { width: 100px; }  /* Expiry */
-th:nth-child(6), td:nth-child(6) { width: 120px; }  /* Status */
-th:nth-child(7), td:nth-child(7) { width: 100px; }  /* Qty */
-th:nth-child(8), td:nth-child(8) { width: 120px; }  /* Price */
-th:nth-child(9), td:nth-child(9) { width: 120px; }  /* Purchase */
-th:nth-child(10), td:nth-child(10) { width: 100px; } /* Action */
+th:nth-child(1), td:nth-child(1) { width: 35px; }
+th:nth-child(2), td:nth-child(2) { width: 120px; }
+th:nth-child(3), td:nth-child(3) { width: 180px; }
+th:nth-child(4), td:nth-child(4) { width: 140px; }
+th:nth-child(5), td:nth-child(5) { width: 90px; }
+th:nth-child(6), td:nth-child(6) { width: 110px; }
+th:nth-child(7), td:nth-child(7) { width: 90px; }
+th:nth-child(8), td:nth-child(8) { width: 110px; }
+th:nth-child(9), td:nth-child(9) { width: 110px; }
+th:nth-child(10), td:nth-child(10) { width: 90px; }
 }
 
 /* GROUP */
@@ -215,6 +214,7 @@ th:nth-child(10), td:nth-child(10) { width: 100px; } /* Action */
   color: blue;
   cursor: pointer;
   text-decoration: underline;
+  font-size: 11px;
 }
 </style>
 </head>
