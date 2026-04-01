@@ -166,6 +166,7 @@ async function addEquipment() {
   let item = {
     tag: document.getElementById("tag").value.trim(),
     desc: document.getElementById("desc").value.trim(),
+    itemSerial: document.getElementById("itemSerial").value.trim(),
     resit: document.getElementById("resit").value.trim(),
     qty: document.getElementById("qty").value.trim(),
     price: document.getElementById("price").value, // ✅ KEEP DECIMAL
@@ -235,7 +236,12 @@ function renderData(filtered = null) {
             ${item.tag}
           </span>
         </td>
-        <td>${item.desc}</td>
+        <td>
+          <div>${item.desc}</div>
+          <div style="font-size:10px; color:#555;">
+            ${item.itemSerial ? "SN: " + item.itemSerial : ""}
+          </div>
+        </td>
 
         <td>
           ${item.resit || "-"}<br>
@@ -376,6 +382,7 @@ function editItem(setId, itemId) {
   // fill form
   document.getElementById("tag").value = item.tag || "";
   document.getElementById("desc").value = item.desc || "";
+  document.getElementById("itemSerial").value = item.itemSerial || "";
   document.getElementById("resit").value = item.resit || "";
   document.getElementById("qty").value = item.qty || "";
   document.getElementById("price").value = item.price || "";
@@ -431,6 +438,7 @@ async function deleteSet(setId) {
 function clearForm() {
   document.getElementById("tag").value = "";
   document.getElementById("desc").value = "";
+  document.getElementById("itemSerial").value = "";
   document.getElementById("resit").value = "";
   document.getElementById("qty").value = "";
   document.getElementById("price").value = "";

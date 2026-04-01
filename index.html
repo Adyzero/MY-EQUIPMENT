@@ -108,6 +108,7 @@ table {
 /* ✅ ONLY Description column can wrap */
 td:nth-child(3) {
   white-space: normal;       /* allow wrap */
+  line-height: 1.3;
   overflow: visible;         
   text-overflow: unset;      
   word-break: break-word;    
@@ -257,6 +258,7 @@ th:nth-child(10), td:nth-child(10) { width: 70px; } /* Action */
   <div class="form-grid">
     <div class="form-group"><label>Tag</label><input id="tag"></div>
     <div class="form-group"><label>Description</label><input id="desc"></div>
+    <div class="form-group"><label>Serial No (Item)</label><input id="itemSerial"></div>
     <div class="form-group"><label>Receipt No</label><input id="resit"></div>
     <div class="form-group"><label>Quantity</label><input id="qty"></div>
     <div class="form-group"><label>Price</label><input id="price"></div>
