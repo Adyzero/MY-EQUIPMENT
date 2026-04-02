@@ -7,6 +7,8 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0d6efd">
 <style>
 body {
   font-family: 'Poppins', sans-serif;
@@ -375,6 +377,12 @@ const storage = firebase.storage();
 
 <script src="script.js"></script>
 
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js")
+    .then(() => console.log("Service Worker Registered"));
+}
+</script>
 </body>
 </html>
 
